@@ -1,0 +1,3 @@
+# 文本审核插件依赖
+# WebUI 需要 quart 库（AstrBot 自带，无需单独安装）
+# quart

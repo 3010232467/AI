@@ -1,0 +1,1270 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🌸 文本审核管理 · 樱花🌸</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        /* ===== 全局：流动渐变背景 ===== */
+        body {
+            font-family: "Segoe UI", "PingFang SC", "Microsoft YaHei", -apple-system, sans-serif;
+            background: linear-gradient(135deg, #ffe0ec, #f3e5f5, #e8eaf6, #fce4ec, #f3e5f5);
+            background-size: 400% 400%;
+            background-attachment: fixed;
+            min-height: 100vh;
+            color: #5a3d54;
+            padding: 20px;
+            position: relative;
+            overflow-x: hidden;
+            animation: flowBg 16s ease infinite;
+        }
+        @keyframes flowBg {
+            0%   { background-position: 0% 50%; }
+            25%  { background-position: 100% 0%; }
+            50%  { background-position: 100% 100%; }
+            75%  { background-position: 0% 100%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        /* 流动光晕层 - 跟随背景流动的柔光圆斑 */
+        body::before {
+            content: '';
+            position: fixed;
+            top: -120px; right: -120px;
+            width: 360px; height: 360px;
+            background: radial-gradient(circle, rgba(255,143,171,0.3), transparent 70%);
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 0;
+            animation: floatGlow1 20s ease-in-out infinite;
+        }
+        body::after {
+            content: '';
+            position: fixed;
+            bottom: -150px; left: -100px;
+            width: 420px; height: 420px;
+            background: radial-gradient(circle, rgba(179,157,219,0.25), transparent 70%);
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 0;
+            animation: floatGlow2 24s ease-in-out infinite;
+        }
+        @keyframes floatGlow1 {
+            0%   { transform: translate(0, 0); }
+            33%  { transform: translate(40px, 30px); }
+            66%  { transform: translate(-20px, 50px); }
+            100% { transform: translate(0, 0); }
+        }
+        @keyframes floatGlow2 {
+            0%   { transform: translate(0, 0); }
+            33%  { transform: translate(-40px, -30px); }
+            66%  { transform: translate(30px, -50px); }
+            100% { transform: translate(0, 0); }
+        }
+
+        /* ===== 樱花飘落动画层 ===== */
+        .sakura-layer {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            pointer-events: none;
+            z-index: 1;
+            overflow: hidden;
+        }
+        .sakura {
+            position: absolute;
+            top: -30px;
+            color: #ff9ec4;
+            font-size: 16px;
+            opacity: 0;
+            animation: fall linear infinite;
+            text-shadow: 0 0 6px rgba(255,158,196,0.5);
+        }
+        @keyframes fall {
+            0%   { transform: translateY(0) rotate(0deg) translateX(0); opacity: 0; }
+            10%  { opacity: 0.9; }
+            90%  { opacity: 0.9; }
+            100% { transform: translateY(105vh) rotate(720deg) translateX(80px); opacity: 0; }
+        }
+
+        /* ===== 顶部标题区 ===== */
+        .header {
+            position: relative;
+            z-index: 2;
+            text-align: center;
+            margin: 14px 0 24px;
+        }
+        .header h1 {
+            display: inline-block;
+            font-size: 28px;
+            font-weight: 800;
+            background: linear-gradient(90deg, #ff6b9d, #b39ddb, #ff6b9d);
+            background-size: 200% auto;
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: shimmer 4s linear infinite;
+            letter-spacing: 1px;
+        }
+        .header .subtitle {
+            margin-top: 6px;
+            font-size: 13px;
+            color: #b080a0;
+            letter-spacing: 2px;
+        }
+        .header .credit {
+            margin-top: 2px;
+            font-size: 11px;
+            color: #c9a0b8;
+            letter-spacing: 1px;
+            opacity: 0.7;
+        }
+        @keyframes shimmer {
+            0% { background-position: 0% center; }
+            100% { background-position: 200% center; }
+        }
+
+        #toast, #debug-info, .tabs, .tab-content, .stats, .panel { position: relative; z-index: 2; }
+
+        /* ===== 标签页 ===== */
+        .tabs {
+            display: flex;
+            gap: 6px;
+            margin-bottom: 22px;
+            background: rgba(255,255,255,0.5);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            padding: 6px;
+            border-radius: 16px;
+            border: 1px solid rgba(255,255,255,0.6);
+            box-shadow: 0 4px 20px rgba(255,143,171,0.12);
+        }
+        .tab {
+            flex: 1;
+            padding: 10px 16px;
+            cursor: pointer;
+            border: none;
+            background: transparent;
+            font-size: 14px;
+            font-weight: 600;
+            color: #9a7a90;
+            border-radius: 12px;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .tab.active {
+            color: white;
+            background: linear-gradient(135deg, #ff8fab, #b39ddb);
+            box-shadow: 0 4px 14px rgba(255,107,157,0.35);
+        }
+        .tab:hover:not(.active) {
+            background: rgba(255,255,255,0.5);
+            color: #ff6b9d;
+        }
+        .tab-content { display: none; animation: fadeIn 0.4s ease; }
+        .tab-content.active { display: block; }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(8px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
+        /* ===== 统计卡片 ===== */
+        .stats { display: flex; gap: 16px; margin-bottom: 22px; }
+        .stat-card {
+            flex: 1;
+            background: rgba(255,255,255,0.55);
+            backdrop-filter: blur(14px);
+            -webkit-backdrop-filter: blur(14px);
+            border: 1px solid rgba(255,255,255,0.7);
+            border-radius: 18px;
+            padding: 20px 15px;
+            text-align: center;
+            box-shadow: 0 6px 24px rgba(255,143,171,0.12);
+            transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.4s ease, border-color 0.4s ease;
+            cursor: default;
+            position: relative;
+        }
+        .stat-card:hover {
+            transform: translateY(-6px) scale(1.02);
+            border-color: rgba(255,143,171,0.7);
+            box-shadow:
+                0 0 0 1px rgba(255,143,171,0.5),
+                0 0 20px rgba(255,143,171,0.4),
+                0 0 44px rgba(255,143,171,0.2),
+                0 12px 36px rgba(255,143,171,0.18);
+        }
+        /* 不同颜色卡片 hover 时发对应色光 */
+        .stat-card.blocked:hover {
+            border-color: rgba(236,64,122,0.8);
+            box-shadow:
+                0 0 0 1px rgba(236,64,122,0.6),
+                0 0 22px rgba(236,64,122,0.45),
+                0 0 46px rgba(236,64,122,0.22),
+                0 12px 36px rgba(236,64,122,0.2);
+        }
+        .stat-card.warning:hover {
+            border-color: rgba(255,167,38,0.8);
+            box-shadow:
+                0 0 0 1px rgba(255,167,38,0.6),
+                0 0 22px rgba(255,167,38,0.45),
+                0 0 46px rgba(255,167,38,0.22),
+                0 12px 36px rgba(255,167,38,0.2);
+        }
+        .stat-card.violation:hover {
+            border-color: rgba(255,107,157,0.8);
+            box-shadow:
+                0 0 0 1px rgba(255,107,157,0.6),
+                0 0 22px rgba(255,107,157,0.45),
+                0 0 46px rgba(255,107,157,0.22),
+                0 12px 36px rgba(255,107,157,0.2);
+        }
+        .stat-card.admin:hover {
+            border-color: rgba(102,187,106,0.8);
+            box-shadow:
+                0 0 0 1px rgba(102,187,106,0.6),
+                0 0 22px rgba(102,187,106,0.45),
+                0 0 46px rgba(102,187,106,0.22),
+                0 12px 36px rgba(102,187,106,0.2);
+        }
+        .stat-icon { font-size: 26px; margin-bottom: 4px; display: block; }
+        .stat-num {
+            font-size: 32px;
+            font-weight: 800;
+            line-height: 1.2;
+            background: linear-gradient(135deg, #ff6b9d, #b39ddb);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .stat-card.blocked .stat-num { background: linear-gradient(135deg, #ec407a, #ff8fab); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
+        .stat-card.warning .stat-num { background: linear-gradient(135deg, #ffa726, #ffcc80); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
+        .stat-card.violation .stat-num { background: linear-gradient(135deg, #ff6b9d, #b39ddb); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
+        .stat-card.admin .stat-num { background: linear-gradient(135deg, #66bb6a, #aed581); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
+        .stat-label { font-size: 13px; color: #9a7a90; margin-top: 4px; font-weight: 500; }
+
+        /* ===== 面板（毛玻璃卡片，hover 自发光）===== */
+        .panel {
+            background: rgba(255,255,255,0.55);
+            backdrop-filter: blur(14px);
+            -webkit-backdrop-filter: blur(14px);
+            border: 1px solid rgba(255,255,255,0.7);
+            border-radius: 18px;
+            padding: 22px;
+            box-shadow: 0 6px 24px rgba(255,143,171,0.12);
+            margin-bottom: 20px;
+            transition: box-shadow 0.4s ease, border-color 0.4s ease;
+        }
+        .panel:hover {
+            border-color: rgba(255,143,171,0.7);
+            box-shadow:
+                0 0 0 1px rgba(255,143,171,0.45),
+                0 0 22px rgba(255,143,171,0.35),
+                0 0 48px rgba(255,143,171,0.18),
+                0 8px 30px rgba(255,143,171,0.15);
+        }
+
+        .section-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; flex-wrap: wrap; gap: 8px; }
+        .section-title { font-size: 16px; font-weight: 700; color: #5a3d54; display: flex; align-items: center; gap: 6px; }
+        .badge {
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        .badge-blocked { background: rgba(236,64,122,0.15); color: #c2185b; }
+        .badge-warning { background: rgba(255,167,38,0.15); color: #ef6c00; }
+        .badge-admin { background: rgba(102,187,106,0.15); color: #2e7d32; }
+
+        /* ===== 输入框 ===== */
+        .add-form { display: flex; gap: 8px; margin-bottom: 14px; flex-wrap: wrap; }
+        .input {
+            padding: 10px 14px;
+            border: 1px solid rgba(255,143,171,0.3);
+            border-radius: 12px;
+            font-size: 14px;
+            flex: 1;
+            min-width: 180px;
+            background: rgba(255,255,255,0.6);
+            color: #5a3d54;
+            transition: all 0.25s;
+        }
+        .input::placeholder { color: #c4a0b4; }
+        .input:focus {
+            outline: none;
+            border-color: #ff6b9d;
+            background: rgba(255,255,255,0.85);
+            box-shadow: 0 0 0 3px rgba(255,107,157,0.15);
+        }
+
+        /* ===== 按钮 ===== */
+        .btn {
+            padding: 10px 16px;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.2s, filter 0.2s;
+        }
+        .btn:active { transform: scale(0.94); }
+        .btn-add { background: linear-gradient(135deg, #ff8fab, #ff6b9d); color: white; box-shadow: 0 4px 12px rgba(255,107,157,0.35); }
+        .btn-add:hover { transform: translateY(-2px); box-shadow: 0 6px 18px rgba(255,107,157,0.45); filter: brightness(1.05); }
+        .btn-clear { background: linear-gradient(135deg, #ffcc80, #ffa726); color: white; padding: 6px 14px; font-size: 13px; box-shadow: 0 3px 10px rgba(255,167,38,0.3); }
+        .btn-clear:hover { transform: translateY(-2px); filter: brightness(1.05); }
+        .btn-danger { background: linear-gradient(135deg, #ff7eb3, #ec407a); color: white; box-shadow: 0 4px 12px rgba(236,64,122,0.35); }
+        .btn-danger:hover { transform: translateY(-2px); filter: brightness(1.05); box-shadow: 0 6px 18px rgba(236,64,122,0.45); }
+
+        /* ===== 词标签 ===== */
+        .word-list { display: flex; flex-wrap: wrap; gap: 8px; min-height: 44px; }
+        .word-tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            background: linear-gradient(135deg, rgba(255,255,255,0.85), rgba(255,228,238,0.7));
+            border: 1px solid rgba(255,143,171,0.3);
+            border-radius: 16px;
+            padding: 5px 8px 5px 12px;
+            font-size: 13px;
+            color: #5a3d54;
+            transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.2s;
+            box-shadow: 0 2px 6px rgba(255,143,171,0.1);
+        }
+        .word-tag:hover { transform: translateY(-2px) scale(1.04); box-shadow: 0 4px 12px rgba(255,143,171,0.25); }
+        .word-tag .close { cursor: pointer; color: #ff6b9d; font-weight: 700; padding: 0 4px; font-size: 17px; line-height: 1; transition: transform 0.2s, color 0.2s; }
+        .word-tag .close:hover { color: #e91e63; transform: rotate(90deg) scale(1.2); }
+
+        .empty { text-align: center; padding: 20px; color: #c4a0b4; font-size: 14px; }
+        .loading { text-align: center; padding: 40px; color: #c4a0b4; font-size: 14px; }
+
+        /* ===== Toast ===== */
+        .toast {
+            position: fixed;
+            top: 24px; right: 24px;
+            padding: 14px 22px;
+            border-radius: 14px;
+            color: white;
+            opacity: 0;
+            transform: translateX(40px);
+            transition: opacity 0.35s, transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+            z-index: 1000;
+            font-size: 14px;
+            font-weight: 500;
+            max-width: 400px;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.15);
+            backdrop-filter: blur(10px);
+        }
+        .toast.show { opacity: 1; transform: translateX(0); }
+        .toast.success { background: linear-gradient(135deg, #81c784, #66bb6a); }
+        .toast.error { background: linear-gradient(135deg, #ff7eb3, #ec407a); }
+
+        .debug { font-size: 12px; color: #b080a0; margin-top: 12px; word-break: break-all; z-index: 2; position: relative; }
+
+        /* ===== 表格 ===== */
+        .table-wrap { overflow-x: auto; border-radius: 12px; }
+        table { width: 100%; border-collapse: collapse; table-layout: fixed; }
+        th {
+            padding: 12px 10px;
+            text-align: left;
+            font-size: 13px;
+            font-weight: 700;
+            color: #5a3d54;
+            background: rgba(255,228,238,0.5);
+            border-bottom: 2px solid rgba(255,143,171,0.25);
+            white-space: nowrap;
+        }
+        td { padding: 10px; text-align: left; border-bottom: 1px solid rgba(255,143,171,0.1); font-size: 13px; white-space: nowrap; overflow: hidden; position: relative; cursor: default; }
+        td:hover { z-index: 20; background: rgba(255,210,220,0.7); border-radius: 6px; transition: background 0.2s ease; }
+        /* 悬浮提示卡片 */
+        #tooltip-card {
+            position: fixed;
+            padding: 10px 18px;
+            background: linear-gradient(135deg, rgba(106,27,77,0.78), rgba(156,39,176,0.78));
+            color: #fff;
+            font-size: 13px;
+            line-height: 1.5;
+            white-space: nowrap;
+            border-radius: 12px;
+            box-shadow: 0 8px 32px rgba(156,39,176,0.35), 0 0 0 1px rgba(255,255,255,0.12);
+            z-index: 9999;
+            pointer-events: none;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.2s ease, transform 0.2s ease, visibility 0.2s;
+            font-weight: 500;
+            letter-spacing: 0.3px;
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            max-width: 80vw;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            transform: translateY(4px) scale(0.94);
+        }
+        #tooltip-card.show {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0) scale(1);
+        }
+        tr:hover td { background: rgba(255,228,238,0.4); transition: background 0.2s ease; }
+        .level-block { color: #c2185b; font-weight: 700; }
+        .level-warning { color: #ef6c00; font-weight: 700; }
+        .source-tag { font-size: 11px; padding: 2px 8px; border-radius: 10px; font-weight: 600; }
+        .source-keyword { background: rgba(255,107,157,0.15); color: #c2185b; }
+        .source-ai { background: rgba(179,157,219,0.2); color: #7b1fa2; }
+
+        code {
+            background: rgba(255,143,171,0.15);
+            padding: 2px 8px;
+            border-radius: 6px;
+            font-size: 12px;
+            color: #c2185b;
+        }
+
+        /* ===== 鼠标白光跟随（VRC 聚光灯质感）===== */
+        .cursor-glow {
+            position: fixed;
+            top: 0; left: 0;
+            width: 220px; height: 220px;
+            margin: -110px 0 0 -110px;
+            background: radial-gradient(circle,
+                rgba(255,255,255,0.6) 0%,
+                rgba(255,255,255,0.3) 28%,
+                rgba(255,255,255,0.12) 52%,
+                transparent 75%);
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 3;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            will-change: transform;
+            filter: blur(2px);
+        }
+
+    </style>
+</head>
+<body>
+    <!-- 鼠标白光跟随层 -->
+    <div class="cursor-glow" id="cursorGlow"></div>
+    <!-- 樱花飘落层 -->
+    <div class="sakura-layer" id="sakuraLayer"></div>
+
+    <div class="header">
+        <h1>🌸 文本审核管理 🌸</h1>
+        <div class="subtitle">✨ 智能守护 · 阳光社区 ✨</div>
+        <div class="credit">吃糖吃没了 · AI 辅助开发</div>
+    </div>
+
+    <div id="toast" class="toast"></div>
+    <div id="debug-info" class="debug"></div>
+
+    <div class="tabs">
+        <button class="tab active" onclick="switchTab('words')">📝 违禁词</button>
+        <button class="tab" onclick="switchTab('violations')">📋 违规记录</button>
+        <button class="tab" onclick="switchTab('admins')">👮 管理员</button>
+        <button class="tab" onclick="switchTab('tokens')">💰 API消耗</button>
+    </div>
+
+    <!-- 标签页1：违禁词管理 -->
+    <div id="tab-words" class="tab-content active">
+        <div class="stats">
+            <div class="stat-card blocked">
+                <span class="stat-icon">🔴</span>
+                <div class="stat-num" id="blocked-count">0</div>
+                <div class="stat-label">严重违禁词</div>
+            </div>
+            <div class="stat-card warning">
+                <span class="stat-icon">🟡</span>
+                <div class="stat-num" id="warning-count">0</div>
+                <div class="stat-label">轻度违禁词</div>
+            </div>
+        </div>
+        <div class="panel">
+            <div class="section-header">
+                <div><span class="section-title">🚫 严重违禁词</span> <span class="badge badge-blocked">色情/涉政/严重侮辱</span></div>
+                <button class="btn btn-clear" onclick="clearWords('blocked')">🧹 清空</button>
+            </div>
+            <div class="add-form">
+                <input type="text" class="input" id="add-blocked-input" placeholder="输入违禁词，多个用逗号分隔" onkeypress="if(event.key==='Enter')addWords('blocked')">
+                <button class="btn btn-add" onclick="addWords('blocked')">➕ 添加</button>
+            </div>
+            <div class="word-list" id="blocked-list"><div class="loading">加载中...</div></div>
+        </div>
+        <div class="panel">
+            <div class="section-header">
+                <div><span class="section-title">⚠️ 轻度违禁词</span> <span class="badge badge-warning">轻度侮辱/阴阳怪气</span></div>
+                <button class="btn btn-clear" onclick="clearWords('warning')">🧹 清空</button>
+            </div>
+            <div class="add-form">
+                <input type="text" class="input" id="add-warning-input" placeholder="输入违禁词，多个用逗号分隔" onkeypress="if(event.key==='Enter')addWords('warning')">
+                <button class="btn btn-add" onclick="addWords('warning')">➕ 添加</button>
+            </div>
+            <div class="word-list" id="warning-list"><div class="loading">加载中...</div></div>
+        </div>
+    </div>
+
+    <!-- 标签页2：违规记录 -->
+    <div id="tab-violations" class="tab-content">
+        <div class="stats">
+            <div class="stat-card violation">
+                <span class="stat-icon">📋</span>
+                <div class="stat-num" id="violation-total">0</div>
+                <div class="stat-label">违规记录总数</div>
+            </div>
+            <div class="stat-card blocked">
+                <span class="stat-icon">🔴</span>
+                <div class="stat-num" id="violation-block">0</div>
+                <div class="stat-label">严重违规</div>
+            </div>
+            <div class="stat-card warning">
+                <span class="stat-icon">🟡</span>
+                <div class="stat-num" id="violation-warn">0</div>
+                <div class="stat-label">轻度违规</div>
+            </div>
+        </div>
+        <div class="panel">
+            <div class="section-header">
+                <div><span class="section-title">🔍 违规记录详情</span></div>
+                <button class="btn btn-danger" onclick="clearAllViolations()">🗑️ 清空全部</button>
+            </div>
+            <div id="violation-table-wrap" class="table-wrap">
+                <table>
+                    <thead>
+                        <tr>
+                            <th style="width:120px;">⏰ 时间</th>
+                            <th style="width:70px;">👤 用户</th>
+                            <th style="width:70px;">👥 群号</th>
+                            <th style="width:80px;">等级</th>
+                            <th style="width:55px;">来源</th>
+                            <th>📝 违规内容</th>
+                            <th>⚠️ 违规原因</th>
+                            <th style="width:60px;">操作</th>
+                        </tr>
+                    </thead>
+                    <tbody id="violation-tbody">
+                        <tr><td colspan="8" class="empty">加载中...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- 标签页3：管理员设置 -->
+    <div id="tab-admins" class="tab-content">
+        <div class="stats">
+            <div class="stat-card admin">
+                <span class="stat-icon">👮</span>
+                <div class="stat-num" id="admin-count">0</div>
+                <div class="stat-label">管理员数量</div>
+            </div>
+        </div>
+        <div class="panel">
+            <div class="section-header">
+                <div><span class="section-title">👮 管理员列表</span> <span class="badge badge-admin">可执行清空违规等操作</span></div>
+            </div>
+            <div class="add-form">
+                <input type="text" class="input" id="add-admin-input" placeholder="输入管理员QQ号" onkeypress="if(event.key==='Enter')addAdmin()">
+                <button class="btn btn-add" onclick="addAdmin()">➕ 添加管理员</button>
+            </div>
+            <div class="word-list" id="admin-list"><div class="loading">加载中...</div></div>
+        </div>
+        <div class="panel">
+            <div class="section-title" style="margin-bottom: 10px;">💡 说明</div>
+            <div style="font-size: 13px; color: #7a5a70; line-height: 2;">
+                <p>🌸 管理员可以执行 <code>/清空违规记录</code>、<code>/移出黑名单</code> 等管理命令</p>
+                <p>🔔 在插件配置中开启"启用违规私信通知管理员"后，违规时会私信通知管理员</p>
+                <p>📨 私信通知内容包含：用户ID、群号、违规内容、违规原因、违规等级</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- 标签页4：API消耗统计 -->
+    <div id="tab-tokens" class="tab-content">
+        <!-- 模型选择区 -->
+        <div class="panel" style="padding:16px 20px;">
+            <div style="display:flex;flex-wrap:wrap;align-items:center;gap:12px;">
+                <span class="section-title">🧠 计费模型</span>
+                <select id="model-selector" style="flex:1;min-width:160px;padding:8px 12px;border:1px solid #e0d0e0;border-radius:6px;font-size:14px;background:white;color:#555;outline:none;">
+                    <option value="">加载中...</option>
+                </select>
+                <button class="btn btn-add" onclick="saveTokenConfig()" style="padding:8px 18px;">💾 应用</button>
+            </div>
+            <!-- 自定义模型输入 -->
+            <div id="custom-model-fields" style="display:none;margin-top:12px;padding:12px;background:rgba(245,235,245,0.5);border-radius:8px;">
+                <div style="display:flex;flex-wrap:wrap;gap:10px;align-items:end;">
+                    <div style="flex:1;min-width:120px;">
+                        <div style="font-size:12px;color:#999;margin-bottom:3px;">模型名称</div>
+                        <input type="text" id="custom-model-name" class="input" placeholder="例: My Model" style="flex:1;">
+                    </div>
+                    <div style="flex:1;min-width:100px;">
+                        <div style="font-size:12px;color:#999;margin-bottom:3px;">输入 $/1M token</div>
+                        <input type="number" id="custom-model-input" class="input" step="0.01" min="0" placeholder="0.50" style="flex:1;">
+                    </div>
+                    <div style="flex:1;min-width:100px;">
+                        <div style="font-size:12px;color:#999;margin-bottom:3px;">输出 $/1M token</div>
+                        <input type="number" id="custom-model-output" class="input" step="0.01" min="0" placeholder="1.50" style="flex:1;">
+                    </div>
+                </div>
+                <div style="font-size:12px;color:#b0a0b0;margin-top:6px;">选择上方模型为"自定义"后，点击"应用"保存价格</div>
+            </div>
+        </div>
+
+        <div class="stats">
+            <div class="stat-card" style="background:linear-gradient(135deg,rgba(232,245,233,0.5),rgba(255,255,255,0.5))">
+                <span class="stat-icon">📊</span>
+                <div class="stat-num" id="tkn-today-calls">0</div>
+                <div class="stat-label">今日调用次数</div>
+            </div>
+            <div class="stat-card" style="background:linear-gradient(135deg,rgba(227,242,253,0.5),rgba(255,255,255,0.5))">
+                <span class="stat-icon">📥</span>
+                <div class="stat-num" id="tkn-today-prompt">0</div>
+                <div class="stat-label">今日输入Token</div>
+            </div>
+            <div class="stat-card" style="background:linear-gradient(135deg,rgba(252,228,236,0.5),rgba(255,255,255,0.5))">
+                <span class="stat-icon">📤</span>
+                <div class="stat-num" id="tkn-today-completion">0</div>
+                <div class="stat-label">今日输出Token</div>
+            </div>
+            <div class="stat-card" style="background:linear-gradient(135deg,rgba(255,243,224,0.5),rgba(255,255,255,0.5))">
+                <span class="stat-icon">💰</span>
+                <div class="stat-num" id="tkn-today-cost">$0</div>
+                <div class="stat-label">今日预估费用</div>
+            </div>
+        </div>
+        <div class="stats">
+            <div class="stat-card" style="background:linear-gradient(135deg,rgba(243,229,245,0.5),rgba(255,255,255,0.5))">
+                <span class="stat-icon">💬</span>
+                <div class="stat-num" id="tkn-daily-msg">0</div>
+                <div class="stat-label">今日审核消息</div>
+            </div>
+            <div class="stat-card" style="background:linear-gradient(135deg,rgba(225,245,254,0.5),rgba(255,255,255,0.5))">
+                <span class="stat-icon">📝</span>
+                <div class="stat-num" id="tkn-daily-char">0</div>
+                <div class="stat-label">今日文字量</div>
+            </div>
+            <div class="stat-card" style="background:linear-gradient(135deg,rgba(255,248,225,0.5),rgba(255,255,255,0.5))">
+                <span class="stat-icon">📅</span>
+                <div class="stat-num" id="tkn-monthly-msg">0</div>
+                <div class="stat-label">本月审核消息</div>
+            </div>
+            <div class="stat-card" style="background:linear-gradient(135deg,rgba(255,243,224,0.5),rgba(255,255,255,0.5))">
+                <span class="stat-icon">📄</span>
+                <div class="stat-num" id="tkn-monthly-char">0</div>
+                <div class="stat-label">本月文字量</div>
+            </div>
+        </div>
+        <div class="panel">
+            <div class="section-header">
+                <div><span class="section-title">📈 累计用量</span></div>
+                <div style="display:flex;gap:8px;">
+                    <button class="btn btn-clear" onclick="toggleHistory()" style="background:#b39ddb;">📅 历史统计</button>
+                    <button class="btn btn-clear" onclick="refreshTokens()" style="background:#b39ddb;">🔄 刷新</button>
+                </div>
+            </div>
+            <div class="word-list" id="token-detail" style="flex-direction:column;gap:8px;padding:8px 0;">
+                <div class="loading">加载中...</div>
+            </div>
+        </div>
+
+        <!-- 历史统计面板（默认隐藏） -->
+        <div id="history-panel" class="panel" style="display:none;">
+            <div class="section-header">
+                <div><span class="section-title">📅 历史统计</span></div>
+                <div style="display:flex;gap:6px;">
+                    <button class="btn btn-clear" onclick="historyTab('daily')" style="background:#ce93d8;font-size:12px;padding:5px 12px;" id="htab-daily">日统计</button>
+                    <button class="btn btn-clear" onclick="historyTab('monthly')" style="background:#ba68c8;font-size:12px;padding:5px 12px;" id="htab-monthly">月统计</button>
+                </div>
+            </div>
+            <!-- 日统计 -->
+            <div id="history-daily" style="overflow-x:auto;">
+                <div class="loading">加载中...</div>
+            </div>
+            <!-- 月统计 -->
+            <div id="history-monthly" style="display:none;overflow-x:auto;">
+                <div class="loading">加载中...</div>
+            </div>
+        </div>
+
+        <div class="panel">
+            <div class="section-header">
+                <div><span class="section-title">📌 各模型定价参考</span></div>
+            </div>
+            <div id="model-pricing-list" style="font-size:13px;line-height:2;color:#7a5a70;">
+                <div class="loading">加载中...</div>
+            </div>
+        </div>
+        <div class="panel">
+            <div class="section-title" style="margin-bottom:10px;">💡 说明</div>
+            <div style="font-size:13px;color:#7a5a70;line-height:2;">
+                <p>• Token 用量为估算值（按 2字符≈1 token），实际用量取决于模型 Tokenizer</p>
+                <p>• 在上方下拉框选择你使用的模型，点击"应用"后费用即可按对应价格估算</p>
+                <p>• 选择"自定义"可自行输入模型名称和价格（输入/输出每百万 token 的美元价格）</p>
+                <p>• 今日/本月消息数和文字量统计取"最小审核长度"以上的消息</p>
+                <p>• 每日统计在 00:00 自动重置</p>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        const bridge = window.AstrBotPluginPage;
+        let ready = false;
+        const debugEl = document.getElementById('debug-info');
+
+        function debug(msg) {
+            debugEl.textContent = '[调试] ' + msg;
+            console.log('[文本审核管理]', msg);
+        }
+
+        if (bridge) {
+            try {
+                const ctx = await bridge.ready();
+                debug('Bridge 就绪');
+                ready = true;
+            } catch(e) {
+                debug('Bridge 初始化失败: ' + (e.message || e));
+            }
+        } else {
+            debug('window.AstrBotPluginPage 不存在');
+        }
+
+        // ========== 樱花飘落生成器 ==========
+        function createSakura() {
+            const layer = document.getElementById('sakuraLayer');
+            const petals = ['🌸', '🌺', '🌸', '✿', '🌸'];
+            for (let i = 0; i < 14; i++) {
+                const s = document.createElement('div');
+                s.className = 'sakura';
+                s.textContent = petals[Math.floor(Math.random() * petals.length)];
+                s.style.left = Math.random() * 100 + '%';
+                s.style.fontSize = (12 + Math.random() * 12) + 'px';
+                s.style.animationDuration = (8 + Math.random() * 10) + 's';
+                s.style.animationDelay = (Math.random() * 12) + 's';
+                s.style.opacity = (0.4 + Math.random() * 0.5);
+                layer.appendChild(s);
+            }
+        }
+        createSakura();
+
+        // ========== 鼠标白光跟随（带惯性平滑）==========
+        const glowEl = document.getElementById('cursorGlow');
+        let glowX = window.innerWidth / 2, glowY = window.innerHeight / 2;
+        let targetX = glowX, targetY = glowY;
+
+        document.addEventListener('mousemove', (e) => {
+            targetX = e.clientX;
+            targetY = e.clientY;
+            glowEl.style.opacity = '1';
+        });
+        document.addEventListener('mouseleave', () => {
+            glowEl.style.opacity = '0';
+        });
+
+        function updateGlow() {
+            glowX += (targetX - glowX) * 0.2;
+            glowY += (targetY - glowY) * 0.2;
+            glowEl.style.transform = `translate(${glowX}px, ${glowY}px)`;
+            requestAnimationFrame(updateGlow);
+        }
+        requestAnimationFrame(updateGlow);
+
+
+        // ========== 数字滚动动画 ==========
+        function animateNumber(id, target) {
+            const el = document.getElementById(id);
+            if (!el) return;
+            const start = parseInt(el.textContent) || 0;
+            if (start === target) { el.textContent = target; return; }
+            const duration = 700;
+            const startTime = performance.now();
+            function step(now) {
+                const p = Math.min((now - startTime) / duration, 1);
+                const eased = 1 - Math.pow(1 - p, 3); // easeOutCubic
+                el.textContent = Math.round(start + (target - start) * eased);
+                if (p < 1) requestAnimationFrame(step);
+                else el.textContent = target;
+            }
+            requestAnimationFrame(step);
+        }
+
+        function showToast(msg, type) {
+            const el = document.getElementById('toast');
+            el.textContent = msg;
+            el.className = 'toast show ' + type;
+            setTimeout(() => { el.className = 'toast'; }, 3000);
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = String(text);
+            return div.innerHTML;
+        }
+
+        function formatTime(ts) {
+            if (!ts) return '-';
+            const d = new Date(ts * 1000);
+            return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0') + ' ' + String(d.getHours()).padStart(2,'0') + ':' + String(d.getMinutes()).padStart(2,'0') + ':' + String(d.getSeconds()).padStart(2,'0');
+        }
+
+        // ========== 违禁词管理 ==========
+        async function loadWords() {
+            if (!ready) return;
+            try {
+                let data = await bridge.apiGet("words");
+                const blocked = (data && data.blocked) ? data.blocked : [];
+                const warning = (data && data.warning) ? data.warning : [];
+                renderWords('blocked', blocked);
+                renderWords('warning', warning);
+            } catch(e) {
+                showToast('加载违禁词失败: ' + (e.message || e), 'error');
+            }
+        }
+
+        function renderWords(type, words) {
+            const el = document.getElementById(type + '-list');
+            animateNumber(type + '-count', words.length);
+            if (words.length === 0) {
+                el.innerHTML = '<div class="empty">🍃 暂无违禁词</div>';
+                return;
+            }
+            el.innerHTML = words.map(w =>
+                '<span class="word-tag">' + escapeHtml(w) +
+                '<span class="close" data-type="' + type + '" data-word="' + escapeHtml(w) + '">×</span></span>'
+            ).join('');
+            el.querySelectorAll('.close').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    deleteWord(this.getAttribute('data-type'), this.getAttribute('data-word'));
+                });
+            });
+        }
+
+        async function addWords(type) {
+            const input = document.getElementById('add-' + type + '-input');
+            const text = input.value.trim();
+            if (!text) return;
+            const words = text.split(/[,，]/).map(w => w.trim()).filter(w => w);
+            try {
+                await bridge.apiPost("words/add", { type: type, words: words });
+                showToast('添加成功 🌸', 'success');
+                input.value = '';
+                loadWords();
+            } catch(e) {
+                showToast('添加失败: ' + (e.message || e), 'error');
+            }
+        }
+
+        async function deleteWord(type, word) {
+            try {
+                await bridge.apiPost("words/delete", { type: type, words: [word] });
+                showToast('已删除: ' + word, 'success');
+                loadWords();
+            } catch(e) {
+                showToast('删除失败: ' + (e.message || e), 'error');
+            }
+        }
+
+        async function clearWords(type) {
+            if (!confirm('确定要清空所有' + (type === 'blocked' ? '严重' : '轻度') + '违禁词吗？')) return;
+            try {
+                await bridge.apiPost("words/clear", { type: type });
+                showToast('清空成功 🧹', 'success');
+                loadWords();
+            } catch(e) {
+                showToast('清空失败: ' + (e.message || e), 'error');
+            }
+        }
+
+        // ========== 违规记录 ==========
+        async function loadViolations() {
+            if (!ready) return;
+            try {
+                let data = await bridge.apiGet("violations");
+                const details = (data && data.details) ? data.details : [];
+                const counts = (data && data.counts) ? data.counts : {};
+
+                // 统计
+                let blockCount = 0, warnCount = 0;
+                details.forEach(d => {
+                    if (d.level === 'block') blockCount++;
+                    else if (d.level === 'warning') warnCount++;
+                });
+                animateNumber('violation-total', details.length);
+                animateNumber('violation-block', blockCount);
+                animateNumber('violation-warn', warnCount);
+
+                // 渲染表格
+                const tbody = document.getElementById('violation-tbody');
+                if (details.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="8" class="empty">🍃 暂无违规记录</td></tr>';
+                    return;
+                }
+                // 按时间倒序（最新的在前）
+                const sorted = [...details].sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
+                tbody.innerHTML = sorted.map(d => {
+                    const levelClass = d.level === 'block' ? 'level-block' : 'level-warning';
+                    const levelText = d.level === 'block' ? '🔴 严重' : '🟡 轻度';
+                    const sourceClass = d.source === 'keyword' ? 'source-keyword' : 'source-ai';
+                    const sourceText = d.source === 'keyword' ? '关键词' : 'AI';
+                    return '<tr>' +
+                        '<td data-fulltext="' + escapeHtml(formatTime(d.timestamp)) + '">' + escapeHtml(formatTime(d.timestamp)) + '</td>' +
+                        '<td data-fulltext="' + escapeHtml(d.user_id || '-') + '">' + escapeHtml(d.user_id || '-') + '</td>' +
+                        '<td data-fulltext="' + escapeHtml(d.group_id || '-') + '">' + escapeHtml(d.group_id || '-') + '</td>' +
+                        '<td class="' + levelClass + '" data-fulltext="' + escapeHtml(levelText) + '">' + levelText + '</td>' +
+                        '<td data-fulltext="' + escapeHtml(sourceText) + '"><span class="source-tag ' + sourceClass + '">' + sourceText + '</span></td>' +
+                        '<td data-fulltext="' + escapeHtml(d.content || '-') + '">' + escapeHtml(d.content || '-') + '</td>' +
+                        '<td data-fulltext="' + escapeHtml(d.reason || '-') + '">' + escapeHtml(d.reason || '-') + '</td>' +
+                        '<td><button class="btn btn-danger" style="padding:4px 10px;font-size:12px" onclick="clearUserViolations(\'' + escapeHtml(d.user_id) + '\')">清空</button></td>' +
+                        '</tr>';
+                }).join('');
+            } catch(e) {
+                showToast('加载违规记录失败: ' + (e.message || e), 'error');
+            }
+        }
+
+        async function clearUserViolations(userId) {
+            if (!confirm('确定要清空用户 ' + userId + ' 的违规记录吗？')) return;
+            try {
+                await bridge.apiPost("violations/clear", { user_id: userId });
+                showToast('已清空 🌸', 'success');
+                loadViolations();
+            } catch(e) {
+                showToast('清空失败: ' + (e.message || e), 'error');
+            }
+        }
+
+        async function clearAllViolations() {
+            if (!confirm('确定要清空所有违规记录吗？此操作不可撤销！')) return;
+            try {
+                await bridge.apiPost("violations/clear", {});
+                showToast('已清空全部违规记录 🧹', 'success');
+                loadViolations();
+            } catch(e) {
+                showToast('清空失败: ' + (e.message || e), 'error');
+            }
+        }
+
+        // ========== 管理员管理 ==========
+        async function loadAdmins() {
+            if (!ready) return;
+            try {
+                let data = await bridge.apiGet("admins");
+                const admins = (data && data.admins) ? data.admins : [];
+                animateNumber('admin-count', admins.length);
+                renderAdmins(admins);
+            } catch(e) {
+                showToast('加载管理员失败: ' + (e.message || e), 'error');
+            }
+        }
+
+        function renderAdmins(admins) {
+            const el = document.getElementById('admin-list');
+            if (admins.length === 0) {
+                el.innerHTML = '<div class="empty">🍃 暂未设置管理员</div>';
+                return;
+            }
+            el.innerHTML = admins.map(a =>
+                '<span class="word-tag">👮 ' + escapeHtml(a) +
+                '<span class="close" data-admin="' + escapeHtml(a) + '">×</span></span>'
+            ).join('');
+            el.querySelectorAll('.close').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    deleteAdmin(this.getAttribute('data-admin'));
+                });
+            });
+        }
+
+        async function addAdmin() {
+            const input = document.getElementById('add-admin-input');
+            const adminId = input.value.trim();
+            if (!adminId) return;
+            try {
+                await bridge.apiPost("admins/add", { admin_id: adminId });
+                showToast('添加成功 🌸', 'success');
+                input.value = '';
+                loadAdmins();
+            } catch(e) {
+                showToast('添加失败: ' + (e.message || e), 'error');
+            }
+        }
+
+        async function deleteAdmin(adminId) {
+            try {
+                await bridge.apiPost("admins/delete", { admin_id: adminId });
+                showToast('已删除: ' + adminId, 'success');
+                loadAdmins();
+            } catch(e) {
+                showToast('删除失败: ' + (e.message || e), 'error');
+            }
+        }
+
+        // ========== Token 用量统计 ==========
+        async function loadTokens() {
+            if (!ready) return;
+            try {
+                const data = await bridge.apiGet("tokens");
+                
+                // 填充模型选择器
+                const selector = document.getElementById('model-selector');
+                const currentKey = data._model_key || 'custom';
+                let opts = '';
+                for (const [key, model] of Object.entries(data.models || {})) {
+                    const sel = key === currentKey ? ' selected' : '';
+                    opts += `<option value="${key}"${sel}>${model.name}</option>`;
+                }
+                selector.innerHTML = opts;
+                
+                // 自定义字段显隐
+                const customFields = document.getElementById('custom-model-fields');
+                if (currentKey === 'custom') {
+                    customFields.style.display = 'block';
+                    document.getElementById('custom-model-name').value = data.custom_name || '';
+                    document.getElementById('custom-model-input').value = data.custom_input || '';
+                    document.getElementById('custom-model-output').value = data.custom_output || '';
+                } else {
+                    customFields.style.display = 'none';
+                }
+                
+                // 切换模型时更新自定义字段显隐
+                selector.onchange = function() {
+                    if (this.value === 'custom') {
+                        customFields.style.display = 'block';
+                    } else {
+                        customFields.style.display = 'none';
+                    }
+                };
+
+                document.getElementById('tkn-today-calls').textContent = data.today_calls || 0;
+                document.getElementById('tkn-today-prompt').textContent = numberFormat(data.today_prompt || 0);
+                document.getElementById('tkn-today-completion').textContent = numberFormat(data.today_completion || 0);
+                const costDisplay = (data.today_cost || 0) < 0.001 ? '<$0.001' : '$' + (data.today_cost || 0).toFixed(4);
+                document.getElementById('tkn-today-cost').textContent = costDisplay;
+                
+                // 消息统计卡片
+                document.getElementById('tkn-daily-msg').textContent = numberFormat(data.daily_messages || 0);
+                document.getElementById('tkn-daily-char').textContent = charFormat(data.daily_chars || 0);
+                document.getElementById('tkn-monthly-msg').textContent = numberFormat(data.monthly_messages || 0);
+                document.getElementById('tkn-monthly-char').textContent = charFormat(data.monthly_chars || 0);
+
+                // 累计详情
+                let detailHtml = '';
+                detailHtml += `<div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid #f0e6f0;">
+                    <span>💬 累计审核消息</span><span style="font-weight:bold;color:#9c27b0;">${data.total_messages || 0} 条</span></div>`;
+                detailHtml += `<div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid #f0e6f0;">
+                    <span>📝 累计审核文字</span><span style="font-weight:bold;">${charFormat(data.total_chars || 0)}</span></div>`;
+                detailHtml += `<div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid #f0e6f0;">
+                    <span>📞 总调用次数</span><span style="font-weight:bold;color:#9c27b0;">${data.total_calls || 0} 次</span></div>`;
+                detailHtml += `<div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid #f0e6f0;">
+                    <span>📥 累计输入 Token</span><span style="font-weight:bold;">${numberFormat(data.total_prompt || 0)}</span></div>`;
+                detailHtml += `<div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid #f0e6f0;">
+                    <span>📤 累计输出 Token</span><span style="font-weight:bold;">${numberFormat(data.total_completion || 0)}</span></div>`;
+                detailHtml += `<div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid #f0e6f0;">
+                    <span>📊 累计总 Token</span><span style="font-weight:bold;">${numberFormat(data.total_tokens || 0)}</span></div>`;
+                detailHtml += `<div style="display:flex;justify-content:space-between;padding:6px 0;">
+                    <span>💰 累计预估费用（<span style="color:#9c27b0;">${data.model_name || '自定义'}</span>）</span>
+                    <span style="font-weight:bold;color:#e91e63;">${(data.total_cost || 0) < 0.001 ? '<$0.001' : '$' + (data.total_cost || 0).toFixed(4)}</span></div>`;
+                document.getElementById('token-detail').innerHTML = detailHtml;
+
+                // 各模型定价参考（用 onclick 替代 a 标签）
+                let pricingHtml = '<table style="width:100%;border-collapse:collapse;font-size:13px;">';
+                pricingHtml += '<thead><tr style="background:#f5eef5;"><th style="padding:6px 8px;text-align:left;">模型</th><th style="padding:6px 8px;text-align:right;">输入/$1M</th><th style="padding:6px 8px;text-align:right;">输出/$1M</th></tr></thead><tbody>';
+                for (const [key, model] of Object.entries(data.models || {})) {
+                    const isActive = key === currentKey;
+                    pricingHtml += `<tr style="${isActive ? 'background:#f3e5f5;font-weight:bold;' : ''}border-bottom:1px solid #f0e6f0;">
+                        <td style="padding:6px 8px;">${isActive ? '👉 ' : ''}${model.name}</td>
+                        <td style="padding:6px 8px;text-align:right;">$${model.input.toFixed(2)}</td>
+                        <td style="padding:6px 8px;text-align:right;">$${model.output.toFixed(2)}</td>
+                    </tr>`;
+                }
+                pricingHtml += '</tbody></table>';
+                document.getElementById('model-pricing-list').innerHTML = pricingHtml;
+            } catch(e) {
+                document.getElementById('token-detail').innerHTML = '<div class="empty">❌ 加载失败: ' + (e.message || e) + '</div>';
+            }
+        }
+
+        async function saveTokenConfig() {
+            if (!ready) return;
+            const selector = document.getElementById('model-selector');
+            const modelKey = selector.value;
+            const payload = { model_key: modelKey };
+            if (modelKey === 'custom') {
+                payload.custom_name = document.getElementById('custom-model-name').value.trim() || '自定义';
+                payload.custom_input = parseFloat(document.getElementById('custom-model-input').value) || 0.5;
+                payload.custom_output = parseFloat(document.getElementById('custom-model-output').value) || 1.5;
+            }
+            try {
+                await bridge.apiPost("tokens/config", payload);
+                showToast('✅ 计费模型已更新，价格重新计算', 'success');
+                loadTokens(); // 刷新显示
+            } catch(e) {
+                showToast('❌ 保存失败: ' + (e.message || e), 'error');
+            }
+        }
+
+        function refreshTokens() { loadTokens(); }
+
+        function numberFormat(n) {
+            if (n >= 1000000) return (n / 1000000).toFixed(1) + 'M';
+            if (n >= 1000) return (n / 1000).toFixed(1) + 'K';
+            return String(n);
+        }
+
+        function charFormat(n) {
+            if (n >= 10000) return (n / 10000).toFixed(1) + '万';
+            if (n >= 1000) return (n / 1000).toFixed(1) + 'K';
+            return String(n);
+        }
+
+        // ========== 历史统计 ==========
+        let historyVisible = false;
+
+        async function toggleHistory() {
+            const panel = document.getElementById('history-panel');
+            historyVisible = !historyVisible;
+            panel.style.display = historyVisible ? 'block' : 'none';
+            if (historyVisible) {
+                await loadHistory();
+                historyTab('daily');
+            }
+        }
+
+        function historyTab(tab) {
+            document.getElementById('history-daily').style.display = tab === 'daily' ? 'block' : 'none';
+            document.getElementById('history-monthly').style.display = tab === 'monthly' ? 'block' : 'none';
+            // 高亮激活的按钮
+            document.querySelectorAll('#history-panel .btn-clear').forEach(b => b.style.opacity = '0.6');
+            const activeBtn = document.getElementById('htab-' + tab);
+            if (activeBtn) activeBtn.style.opacity = '1';
+        }
+
+        async function loadHistory() {
+            if (!ready) return;
+            try {
+                const data = await bridge.apiGet("tokens/history");
+                renderDailyHistory(data.daily || {});
+                renderMonthlyHistory(data.monthly || {});
+            } catch(e) {
+                document.getElementById('history-daily').innerHTML = '<div class="empty">❌ 加载失败: ' + (e.message || e) + '</div>';
+            }
+        }
+
+        function renderDailyHistory(daily) {
+            const container = document.getElementById('history-daily');
+            const dates = Object.keys(daily).sort().reverse();
+            if (dates.length === 0) {
+                container.innerHTML = '<div class="empty">🍃 暂无历史日统计</div>';
+                return;
+            }
+            let html = '<table style="width:100%;border-collapse:collapse;font-size:13px;">';
+            html += '<thead><tr style="background:rgba(206,147,216,0.2);">' +
+                '<th style="padding:8px 10px;text-align:left;">📅 日期</th>' +
+                '<th style="padding:8px 10px;text-align:right;">📞 调用</th>' +
+                '<th style="padding:8px 10px;text-align:right;">📥 输入Token</th>' +
+                '<th style="padding:8px 10px;text-align:right;">📤 输出Token</th>' +
+                '<th style="padding:8px 10px;text-align:right;">💬 消息</th>' +
+                '<th style="padding:8px 10px;text-align:right;">📝 文字量</th>' +
+                '</tr></thead><tbody>';
+            for (const date of dates) {
+                const d = daily[date];
+                html += '<tr style="border-bottom:1px solid #f0e6f0;">' +
+                    '<td style="padding:8px 10px;font-weight:600;color:#7b1fa2;">' + escapeHtml(date) + '</td>' +
+                    '<td style="padding:8px 10px;text-align:right;">' + (d.calls || 0) + '</td>' +
+                    '<td style="padding:8px 10px;text-align:right;">' + numberFormat(d.prompt || 0) + '</td>' +
+                    '<td style="padding:8px 10px;text-align:right;">' + numberFormat(d.completion || 0) + '</td>' +
+                    '<td style="padding:8px 10px;text-align:right;">' + numberFormat(d.messages || 0) + '</td>' +
+                    '<td style="padding:8px 10px;text-align:right;">' + charFormat(d.chars || 0) + '</td>' +
+                    '</tr>';
+            }
+            html += '</tbody></table>';
+            container.innerHTML = html;
+        }
+
+        function renderMonthlyHistory(monthly) {
+            const container = document.getElementById('history-monthly');
+            const months = Object.keys(monthly).sort().reverse();
+            if (months.length === 0) {
+                container.innerHTML = '<div class="empty">🍃 暂无历史月统计</div>';
+                return;
+            }
+            let html = '<table style="width:100%;border-collapse:collapse;font-size:13px;">';
+            html += '<thead><tr style="background:rgba(186,104,200,0.2);">' +
+                '<th style="padding:8px 10px;text-align:left;">📅 月份</th>' +
+                '<th style="padding:8px 10px;text-align:right;">📞 调用</th>' +
+                '<th style="padding:8px 10px;text-align:right;">💬 消息</th>' +
+                '<th style="padding:8px 10px;text-align:right;">📝 文字量</th>' +
+                '</tr></thead><tbody>';
+            for (const month of months) {
+                const m = monthly[month];
+                html += '<tr style="border-bottom:1px solid #f0e6f0;">' +
+                    '<td style="padding:8px 10px;font-weight:600;color:#7b1fa2;">' + escapeHtml(month) + '</td>' +
+                    '<td style="padding:8px 10px;text-align:right;">' + (m.calls || 0) + '</td>' +
+                    '<td style="padding:8px 10px;text-align:right;">' + numberFormat(m.messages || 0) + '</td>' +
+                    '<td style="padding:8px 10px;text-align:right;">' + charFormat(m.chars || 0) + '</td>' +
+                    '</tr>';
+            }
+            html += '</tbody></table>';
+            container.innerHTML = html;
+        }
+
+        // ========== 标签页切换 ==========
+        function switchTab(tab) {
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+            document.querySelector(`.tab[onclick*="'${tab}'"]`)?.classList.add('active');
+            document.getElementById('tab-' + tab)?.classList.add('active');
+
+            if (tab === 'violations') loadViolations();
+            else if (tab === 'admins') loadAdmins();
+            else if (tab === 'tokens') loadTokens();
+        }
+
+        // 暴露到全局
+        window.switchTab = switchTab;
+        window.addWords = addWords;
+        window.deleteWord = deleteWord;
+        window.clearWords = clearWords;
+        window.clearUserViolations = clearUserViolations;
+        window.clearAllViolations = clearAllViolations;
+        window.addAdmin = addAdmin;
+        window.deleteAdmin = deleteAdmin;
+        window.loadTokens = loadTokens;
+        window.refreshTokens = refreshTokens;
+        window.saveTokenConfig = saveTokenConfig;
+        window.toggleHistory = toggleHistory;
+        window.historyTab = historyTab;
+
+        // 初始加载
+        loadWords();
+
+        // 鼠标跟随悬浮卡片
+        const tooltip = document.getElementById('tooltip-card');
+        let tooltipTimer = null;
+        document.addEventListener('mouseover', function(e) {
+            const td = e.target.closest('td[data-fulltext]');
+            if (!td) { tooltip.classList.remove('show'); return; }
+            const text = td.getAttribute('data-fulltext');
+            if (!text) { tooltip.classList.remove('show'); return; }
+            tooltip.textContent = text;
+            clearTimeout(tooltipTimer);
+            tooltipTimer = setTimeout(() => tooltip.classList.add('show'), 80);
+        });
+        document.addEventListener('mousemove', function(e) {
+            if (!tooltip.classList.contains('show')) return;
+            const pad = 16;
+            const tx = e.clientX + pad;
+            const ty = e.clientY + pad;
+            const tw = tooltip.offsetWidth;
+            const th = tooltip.offsetHeight;
+            const maxX = window.innerWidth - tw - pad;
+            const maxY = window.innerHeight - th - pad;
+            tooltip.style.left = Math.min(tx, maxX) + 'px';
+            tooltip.style.top = Math.min(ty, maxY) + 'px';
+        });
+        document.addEventListener('mouseout', function(e) {
+            const td = e.target.closest('td[data-fulltext]');
+            if (!td) return;
+            clearTimeout(tooltipTimer);
+            tooltip.classList.remove('show');
+        });
+    </script>
+<div id="tooltip-card"></div>
+</body>
+</html>

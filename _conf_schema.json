@@ -1,0 +1,135 @@
+{
+    "ai_provider": {
+        "description": "AI模型提供商",
+        "type": "string",
+        "hint": "选择用于文本审核的AI模型提供商，需要先在系统设置中配置好模型提供商",
+        "_special": "select_provider"
+    },
+    "enable_auto_moderation": {
+        "description": "启用自动审核",
+        "type": "bool",
+        "hint": "是否对所有消息进行自动审核（总开关）",
+        "default": true
+    },
+    "enable_keyword_moderation": {
+        "description": "启用关键词审核",
+        "type": "bool",
+        "hint": "是否使用敏感词匹配进行快速审核",
+        "default": true
+    },
+    "enable_ai_moderation": {
+        "description": "启用AI审核",
+        "type": "bool",
+        "hint": "是否使用AI进行深度语义审核",
+        "default": true
+    },
+    "enable_intercept_message": {
+        "description": "启用消息拦截",
+        "type": "bool",
+        "hint": "检测到违规内容时是否拦截消息发送",
+        "default": true
+    },
+    "enable_recall_message": {
+        "description": "启用消息撤回",
+        "type": "bool",
+        "hint": "检测到违规内容时是否撤回违规消息（需要机器人有管理员权限）",
+        "default": true
+    },
+    "enable_auto_collect": {
+        "description": "启用AI自动收集违禁词",
+        "type": "bool",
+        "hint": "AI审核发现违规时，自动提取违规关键词并添加到词库，下次相同违规可直接被关键词匹配拦截，无需再调用AI",
+        "default": true
+    },
+    "min_message_length": {
+        "description": "最小审核长度",
+        "type": "int",
+        "hint": "消息长度小于此值时跳过审核（避免浪费API调用）",
+        "default": 2
+    },
+    "allowed_groups": {
+        "description": "允许审核的群号列表",
+        "type": "list",
+        "hint": "只对列表中的群进行审核，留空则审核所有群。群号格式为字符串，如：[\"123456789\", \"987654321\"]",
+        "default": []
+    },
+    "word_whitelist": {
+        "description": "敏感词白名单",
+        "type": "list",
+        "hint": "这些词即使在敏感词列表中也不会被检测为违规，如：[\"萝莉\", \"二次元\"]",
+        "default": ["萝莉", "二次元"]
+    },
+    "strict_mode": {
+        "description": "严格模式",
+        "type": "bool",
+        "hint": "开启后只匹配完整词语（不匹配词中词），例如不会把'傻逼'误判为'逼'。关闭则匹配词中词",
+        "default": false
+    },
+    "enable_punishment": {
+        "description": "启用量刑管控",
+        "type": "bool",
+        "hint": "是否启用违规次数累计和自动惩罚功能（总开关）",
+        "default": true
+    },
+    "enable_warning_punishment": {
+        "description": "启用轻度违规警告",
+        "type": "bool",
+        "hint": "是否对轻度违规（如'你妈'、'傻子'）发送警告并撤回消息。轻度违规仅警告，不计入禁言/踢人次数",
+        "default": true
+    },
+    "enable_block_punishment": {
+        "description": "启用严重违规惩罚",
+        "type": "bool",
+        "hint": "是否对严重违规（如色情、涉政、重度侮辱）计入惩罚次数，达到阈值后禁言或踢出",
+        "default": true
+    },
+    "enable_blacklist": {
+        "description": "启用黑名单",
+        "type": "bool",
+        "hint": "是否启用黑名单功能，拉黑用户无法发送消息",
+        "default": true
+    },
+    "punishment_time_window": {
+        "description": "违规计数时间窗口",
+        "type": "int",
+        "hint": "在多长时间（分钟）内累计严重违规次数，超过时间窗口则重置计数",
+        "default": 60
+    },
+    "block_punishment_count": {
+        "description": "严重违规惩罚次数阈值",
+        "type": "int",
+        "hint": "严重违规（如色情、涉政、重度侮辱）达到此次数后触发禁言或踢出",
+        "default": 2
+    },
+    "block_punishment_action": {
+        "description": "严重违规惩罚动作",
+        "type": "string",
+        "hint": "严重违规达到阈值后的惩罚动作。可选：none(仅警告)、mute(禁言)、kick(踢出)",
+        "default": "kick"
+    },
+    "block_punishment_duration": {
+        "description": "严重违规禁言时长",
+        "type": "int",
+        "hint": "当严重违规惩罚动作为mute时生效，设置禁言多少分钟",
+        "default": 120
+    },
+    "admin_list": {
+        "description": "管理员QQ号列表",
+        "type": "list",
+        "hint": "管理员可以执行清空违规记录、管理黑名单等操作，并接收违规私信通知。格式为字符串列表，如：[\"123456\", \"789012\"]",
+        "default": []
+    },
+    "enable_admin_notify": {
+        "description": "启用违规私信通知管理员",
+        "type": "bool",
+        "hint": "发现违规时自动私信通知管理员，包含违规用户、群号、违规内容和原因",
+        "default": false
+    },
+    "token_model": {
+        "description": "Token计费模型",
+        "type": "string",
+        "hint": "选择你使用的AI模型，用于估算Token费用",
+        "default": "custom",
+        "options": ["deepseek-chat", "deepseek-reasoner", "gpt-4o", "gpt-4o-mini", "claude-3-5-sonnet", "qwen-plus", "glm-4", "custom"]
+    }
+}

@@ -293,3 +293,5 @@ astrbot_plugin_text_moderation/
 - **AstrBot**：支持新版本 API（使用 `filter.command` 和 `filter.event_message_type`）
 - **平台**：aiocqhttp（NapCat）、qq_official、telegram、wecom、lark、discord 等
 - **Python**：3.9+
+
+> 查看完整更新日志 → [CHANGELOG.md](CHANGELOG.md)
