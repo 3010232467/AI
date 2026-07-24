@@ -1107,6 +1107,31 @@
             border-color: rgba(255,107,157,0.5);
         }
 
+/* ===== 3D 滚动显示动画 ===== */
+        .reveal-3d {
+            opacity: 0;
+            transform: perspective(900px) rotateX(18deg) rotateY(-6deg) scale(0.88) translateY(30px);
+            transition: opacity 0.7s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+                        transform 0.7s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        }
+        .reveal-3d.visible {
+            opacity: 1;
+            transform: perspective(900px) rotateX(0deg) rotateY(0deg) scale(1) translateY(0);
+        }
+        /* 延迟递增，产生逐个弹出效果 */
+        .reveal-3d.d1 { transition-delay: 0.0s; }
+        .reveal-3d.d2 { transition-delay: 0.08s; }
+        .reveal-3d.d3 { transition-delay: 0.16s; }
+        .reveal-3d.d4 { transition-delay: 0.24s; }
+        .reveal-3d.d5 { transition-delay: 0.32s; }
+        .reveal-3d.d6 { transition-delay: 0.40s; }
+        .reveal-3d.d7 { transition-delay: 0.48s; }
+        .reveal-3d.d8 { transition-delay: 0.56s; }
+        .reveal-3d.d9 { transition-delay: 0.64s; }
+        .reveal-3d.d10{ transition-delay: 0.72s; }
+        .reveal-3d.d11{ transition-delay: 0.80s; }
+        .reveal-3d.d12{ transition-delay: 0.88s; }
+
         /* ===== 侧边栏切换按钮 ===== */
         .sidebar-toggle {
             display: none;
@@ -1379,61 +1404,61 @@
                 <p class="section-desc">多重审核机制，智能识别各种违规内容，让群聊管理更轻松</p>
             </div>
             <div class="features-grid">
-                <div class="feature-card">
+                <div class="feature-card reveal-3d d1">
                     <div class="feature-icon">🔍</div>
                     <h3 class="feature-title">双重检测机制</h3>
                     <p class="feature-desc">关键词检测快速匹配已知违禁词（毫秒级响应），AI 语义分析深度语境判断，识别谐音、拆字、拼音等隐晦表达。</p>
                     <button class="demo-btn" onclick="openDemo('dual-detection')">🎬 查看演示</button>
                 </div>
-                <div class="feature-card">
+                <div class="feature-card reveal-3d d2">
                     <div class="feature-icon">📊</div>
                     <h3 class="feature-title">分级管控</h3>
                     <p class="feature-desc">严重违规（BLOCK）撤回+禁言/踢人，轻度违规（WARNING）仅警告不影响计数，安全消息（SAFE）不干预。</p>
                     <button class="demo-btn" onclick="openDemo('grading')">🎬 查看演示</button>
                 </div>
-                <div class="feature-card">
+                <div class="feature-card reveal-3d d3">
                     <div class="feature-icon">🧠</div>
                     <h3 class="feature-title">AI 自动学习</h3>
                     <p class="feature-desc">AI 审核发现违规时自动提取关键词加入词库，词库持续积累，拦截速度越来越快，节省 API 费用。</p>
                     <button class="demo-btn" onclick="openDemo('ai-learning')">🎬 查看演示</button>
                 </div>
-                <div class="feature-card">
+                <div class="feature-card reveal-3d d4">
                     <div class="feature-icon">🎭</div>
                     <h3 class="feature-title">阴阳怪气识别</h3>
                     <p class="feature-desc">智能区分「对事」（正常吐槽）和「对人」（人身攻击），对事不对人放过，对人不对事警告撤回。</p>
                     <button class="demo-btn" onclick="openDemo('sarcasm')">🎬 查看演示</button>
                 </div>
-                <div class="feature-card">
+                <div class="feature-card reveal-3d d5">
                     <div class="feature-icon">💾</div>
                     <h3 class="feature-title">违规记录</h3>
                     <p class="feature-desc">违规记录保存到本地文件，重启不丢失。记录包含用户ID、群号、内容、原因、等级、时间、来源。</p>
                     <button class="demo-btn" onclick="openDemo('records')">🎬 查看演示</button>
                 </div>
-                <div class="feature-card">
+                <div class="feature-card reveal-3d d6">
                     <div class="feature-icon">🌐</div>
                     <h3 class="feature-title">WebUI 管理</h3>
                     <p class="feature-desc">四标签页管理界面：违禁词管理、违规记录、管理员设置、API 消耗统计，操作简单直观。</p>
                     <button class="demo-btn" onclick="openDemo('webui')">🎬 查看演示</button>
                 </div>
-                <div class="feature-card">
+                <div class="feature-card reveal-3d d7">
                     <div class="feature-icon">👮</div>
                     <h3 class="feature-title">管理员权限</h3>
                     <p class="feature-desc">可设置管理员列表，清空违规记录、移出黑名单等命令需要管理员权限，确保操作安全。</p>
                     <button class="demo-btn" onclick="openDemo('admin')">🎬 查看演示</button>
                 </div>
-                <div class="feature-card">
+                <div class="feature-card reveal-3d d8">
                     <div class="feature-icon">📈</div>
                     <h3 class="feature-title">Token 计量</h3>
                     <p class="feature-desc">自动统计 AI 调用量和 Token 消耗，支持多模型价格换算，每日/每月历史数据查看。</p>
                     <button class="demo-btn" onclick="openDemo('token')">🎬 查看演示</button>
                 </div>
-                <div class="feature-card">
+                <div class="feature-card reveal-3d d9">
                     <div class="feature-icon">📨</div>
                     <h3 class="feature-title">私信通知</h3>
                     <p class="feature-desc">发现违规时自动私信通知所有管理员，包含详细违规信息，及时掌握群聊动态。</p>
                     <button class="demo-btn" onclick="openDemo('notify')">🎬 查看演示</button>
                 </div>
-                <div class="feature-card dev">
+                <div class="feature-card reveal-3d d10">
                     <div class="feature-icon">🚧</div>
                     <h3 class="feature-title">更多功能</h3>
                     <p class="feature-desc">开发中，敬请期待...</p>
@@ -1450,35 +1475,35 @@
                     <p class="section-desc">每一条消息都经过严格的多重检测，确保群聊环境的安全与和谐</p>
                 </div>
                 <div class="workflow-steps">
-                    <div class="workflow-step">
+                    <div class="workflow-step reveal-3d d1">
                         <div class="step-number">1</div>
                         <div class="step-content">
                             <h3>消息接收</h3>
                             <p>插件监听群聊消息，接收每一条新消息并进行预处理。</p>
                         </div>
                     </div>
-                    <div class="workflow-step">
+                    <div class="workflow-step reveal-3d d2">
                         <div class="step-number">2</div>
                         <div class="step-content">
                             <h3>关键词检测</h3>
                             <p>快速匹配词库中的违禁词，毫秒级响应，已知违规词直接拦截。</p>
                         </div>
                     </div>
-                    <div class="workflow-step">
+                    <div class="workflow-step reveal-3d d3">
                         <div class="step-number">3</div>
                         <div class="step-content">
                             <h3>AI 语义分析</h3>
                             <p>通过 AI 模型进行深度语境判断，识别隐晦表达、阴阳怪气等绕过手段。</p>
                         </div>
                     </div>
-                    <div class="workflow-step">
+                    <div class="workflow-step reveal-3d d4">
                         <div class="step-number">4</div>
                         <div class="step-content">
                             <h3>分级判定</h3>
                             <p>根据违规程度判定为 BLOCK（严重）、WARNING（轻度）或 SAFE（安全）。</p>
                         </div>
                     </div>
-                    <div class="workflow-step">
+                    <div class="workflow-step reveal-3d d5">
                         <div class="step-number">5</div>
                         <div class="step-content">
                             <h3>执行处理</h3>
@@ -1497,7 +1522,7 @@
                 <p class="section-desc">直观的四标签页管理界面，轻松管理违禁词、查看违规记录、设置管理员</p>
             </div>
             <div class="preview-grid">
-                <div class="preview-card">
+                <div class="preview-card reveal-3d d1">
                     <div class="preview-header">
                         <div class="preview-icon">📝</div>
                         <div class="preview-title">违禁词管理</div>
@@ -1509,7 +1534,7 @@
                         <div class="preview-item"><span class="check">✓</span>白名单词设置</div>
                     </div>
                 </div>
-                <div class="preview-card">
+                <div class="preview-card reveal-3d d2">
                     <div class="preview-header">
                         <div class="preview-icon">📋</div>
                         <div class="preview-title">违规记录</div>
@@ -1521,7 +1546,7 @@
                         <div class="preview-item"><span class="check">✓</span>清空全部记录</div>
                     </div>
                 </div>
-                <div class="preview-card">
+                <div class="preview-card reveal-3d d3">
                     <div class="preview-header">
                         <div class="preview-icon">👮</div>
                         <div class="preview-title">管理员设置</div>
@@ -1533,7 +1558,7 @@
                         <div class="preview-item"><span class="check">✓</span>私信通知开关</div>
                     </div>
                 </div>
-                <div class="preview-card">
+                <div class="preview-card reveal-3d d4">
                     <div class="preview-header">
                         <div class="preview-icon">📈</div>
                         <div class="preview-title">API 消耗统计</div>
@@ -1682,6 +1707,18 @@
             });
 
             currentPage = index;
+
+            // 切换到新页面后，检查该页面中未触发的 3D 元素
+            setTimeout(() => {
+                currPage.querySelectorAll('.reveal-3d:not(.visible)').forEach(el => {
+                    const rect = el.getBoundingClientRect();
+                    const viewHeight = window.innerHeight;
+                    // 如果元素在可视区内（有部分可见）
+                    if (rect.top < viewHeight - 30 && rect.bottom > 30) {
+                        el.classList.add('visible');
+                    }
+                });
+            }, 100);
             
             // 恢复目标页面的滚动位置
             setTimeout(() => {
@@ -2432,6 +2469,22 @@
         modalOverlay.addEventListener('wheel', (e) => {
             e.stopPropagation();
         }, { passive: false });
+
+        // ===== 3D 滚动显示动画 =====
+        const revealObserver = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                    revealObserver.unobserve(entry.target);
+                }
+            });
+        }, {
+            threshold: 0.15,
+            rootMargin: '0px 0px -30px 0px'
+        });
+
+        // 每张卡片滚动到可视区时触发 3D 效果
+        document.querySelectorAll('.reveal-3d').forEach(el => revealObserver.observe(el));
     </script>
 </body>
 </html>
