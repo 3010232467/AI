@@ -7,7 +7,6 @@
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
 
-        /* ===== 基础样式 ===== */
         :root {
             --primary-gradient: linear-gradient(135deg, #ff6b9d 0%, #ff8fab 50%, #ffc2d1 100%);
             --secondary-gradient: linear-gradient(135deg, #b39ddb 0%, #ce93d8 50%, #e1bee7 100%);
@@ -18,18 +17,17 @@
             --text-secondary: #9a7a90;
             --text-muted: #c4a0b4;
             --border-color: rgba(255,143,171,0.2);
+            --nav-width: 200px;
         }
 
         body {
             font-family: "Segoe UI", "PingFang SC", "Microsoft YaHei", -apple-system, sans-serif;
             background: var(--bg-light);
             color: var(--text-primary);
-            min-height: 100vh;
-            overflow-x: hidden;
+            overflow: hidden;
             position: relative;
         }
 
-        /* ===== 背景 ===== */
         .bg-container {
             position: fixed;
             top: 0; left: 0;
@@ -47,106 +45,146 @@
             100% { background-position: 0% 50%; }
         }
 
-        /* ===== 导航栏 ===== */
-        nav {
+        /* ===== 左侧导航栏 ===== */
+        .sidebar {
             position: fixed;
-            top: 0; left: 0;
-            width: 100%;
+            left: 0; top: 0;
+            width: var(--nav-width);
+            height: 100vh;
             z-index: 100;
             backdrop-filter: blur(20px);
-            background: rgba(255,255,255,0.7);
-            border-bottom: 1px solid var(--border-color);
-            transition: all 0.3s ease;
-        }
-        nav.scrolled {
-            background: rgba(255,255,255,0.95);
-            box-shadow: 0 4px 30px rgba(255,143,171,0.15);
-        }
-        .nav-container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 16px 20px;
+            background: rgba(255,255,255,0.85);
+            border-right: 1px solid var(--border-color);
             display: flex;
-            justify-content: space-between;
-            align-items: center;
+            flex-direction: column;
+            padding: 20px 0;
         }
-        .logo {
-            font-size: 22px;
+        .sidebar-logo {
+            padding: 0 20px;
+            margin-bottom: 30px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .sidebar-logo-icon {
+            width: 36px; height: 36px;
+            background: url('logo.png') center/contain no-repeat;
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(255,107,157,0.3);
+        }
+        .sidebar-logo-text {
+            font-size: 16px;
             font-weight: 700;
             background: var(--primary-gradient);
             -webkit-background-clip: text;
             background-clip: text;
             -webkit-text-fill-color: transparent;
+        }
+        .sidebar-nav {
+            flex: 1;
+            padding: 0 10px;
+        }
+        .nav-item {
             display: flex;
             align-items: center;
-            gap: 8px;
-        }
-        .logo-icon {
-            width: 32px; height: 32px;
-            background: url('logo.png') center/contain no-repeat;
-            border-radius: 8px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 16px;
-            box-shadow: 0 0 20px rgba(255,107,157,0.4);
-        }
-        .nav-links {
-            display: flex;
-            gap: 24px;
-        }
-        .nav-links a {
+            gap: 10px;
+            padding: 12px 16px;
+            margin-bottom: 4px;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
             color: var(--text-secondary);
-            text-decoration: none;
             font-size: 14px;
             font-weight: 500;
-            transition: all 0.3s ease;
             position: relative;
         }
-        .nav-links a:hover {
+        .nav-item:hover {
+            background: rgba(255,107,157,0.08);
             color: var(--accent-color);
         }
-        .nav-links a::after {
+        .nav-item.active {
+            background: rgba(255,107,157,0.15);
+            color: #ff6b9d;
+            font-weight: 600;
+        }
+        .nav-item.active::before {
             content: '';
             position: absolute;
-            bottom: -4px; left: 0;
-            width: 0; height: 2px;
+            left: 0; top: 50%;
+            transform: translateY(-50%);
+            width: 4px;
+            height: 24px;
             background: var(--primary-gradient);
-            transition: width 0.3s ease;
+            border-radius: 0 4px 4px 0;
         }
-        .nav-links a:hover::after {
-            width: 100%;
+        .nav-item-icon {
+            font-size: 18px;
+            width: 24px;
+            text-align: center;
         }
-        .nav-btn {
-            background: var(--primary-gradient);
-            color: white;
-            padding: 8px 20px;
-            border-radius: 20px;
-            text-decoration: none;
-            font-size: 14px;
-            font-weight: 600;
-            transition: all 0.3s ease;
-            box-shadow: 0 4px 15px rgba(255,107,157,0.3);
+        .sidebar-footer {
+            padding: 20px;
+            border-top: 1px solid var(--border-color);
+            text-align: center;
         }
-        .nav-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 25px rgba(255,107,157,0.5);
+        .sidebar-footer .footer-author {
+            font-size: 12px;
+            color: var(--text-muted);
         }
 
         /* ===== 主内容区 ===== */
-        main { position: relative; z-index: 1; }
-
-        /* ===== Hero 区域 ===== */
-        .hero {
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 80px 20px 40px;
-            text-align: center;
+        .main-content {
+            margin-left: var(--nav-width);
+            width: calc(100% - var(--nav-width));
+            height: 100vh;
+            overflow: hidden;
+            position: relative;
         }
-        .hero-content {
-            max-width: 800px;
+
+        /* ===== 卡片式页面 ===== */
+        .page-card {
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%;
+            height: 100vh;
+            padding: 60px 80px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            overflow-y: auto;
+            transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.6s ease;
+            opacity: 0;
+            pointer-events: none;
+        }
+        .page-card::-webkit-scrollbar {
+            width: 6px;
+        }
+        .page-card::-webkit-scrollbar-track {
+            background: rgba(255,143,171,0.1);
+            border-radius: 3px;
+        }
+        .page-card::-webkit-scrollbar-thumb {
+            background: rgba(255,107,157,0.4);
+            border-radius: 3px;
+        }
+        .page-card.active {
+            opacity: 1;
+            pointer-events: auto;
+            transform: translateY(0);
+        }
+        .page-card.next {
+            transform: translateY(100%);
+        }
+        .page-card.prev {
+            transform: translateY(-100%);
+        }
+
+        /* ===== Hero 卡片 ===== */
+        .hero-card {
+            text-align: center;
+            justify-content: center;
+            overflow-y: hidden;
         }
         .hero-tagline {
             display: inline-block;
@@ -156,14 +194,14 @@
             padding: 6px 16px;
             font-size: 13px;
             color: #ff6b9d;
-            margin-bottom: 20px;
+            margin-bottom: 24px;
             animation: fadeInUp 0.6s ease;
         }
         .hero-title {
-            font-size: 48px;
+            font-size: 52px;
             font-weight: 800;
             line-height: 1.2;
-            margin-bottom: 20px;
+            margin-bottom: 24px;
             animation: fadeInUp 0.6s ease 0.1s both;
             color: #5a3d54;
         }
@@ -177,7 +215,8 @@
             font-size: 18px;
             color: var(--text-secondary);
             line-height: 1.7;
-            margin-bottom: 40px;
+            margin-bottom: 48px;
+            max-width: 700px;
             animation: fadeInUp 0.6s ease 0.2s both;
         }
         .hero-buttons {
@@ -227,7 +266,7 @@
         .hero-stats {
             display: flex;
             justify-content: center;
-            gap: 60px;
+            gap: 80px;
             margin-top: 80px;
             animation: fadeInUp 0.6s ease 0.4s both;
         }
@@ -235,7 +274,7 @@
             text-align: center;
         }
         .stat-num {
-            font-size: 36px;
+            font-size: 40px;
             font-weight: 800;
             background: var(--primary-gradient);
             -webkit-background-clip: text;
@@ -248,24 +287,25 @@
             margin-top: 4px;
         }
 
-        @keyframes fadeInUp {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
+        /* ===== 功能特性卡片 ===== */
+        .features-card {
+            padding: 40px 60px;
+            overflow-y: auto;
         }
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
+        .features-card::-webkit-scrollbar {
+            width: 6px;
         }
-
-        /* ===== 功能特性区域 ===== */
-        .features {
-            padding: 100px 20px;
-            max-width: 1200px;
-            margin: 0 auto;
+        .features-card::-webkit-scrollbar-track {
+            background: rgba(255,143,171,0.1);
+            border-radius: 3px;
+        }
+        .features-card::-webkit-scrollbar-thumb {
+            background: rgba(255,107,157,0.4);
+            border-radius: 3px;
         }
         .section-header {
             text-align: center;
-            margin-bottom: 60px;
+            margin-bottom: 48px;
         }
         .section-subtitle {
             font-size: 13px;
@@ -286,18 +326,22 @@
             max-width: 600px;
             margin: 0 auto;
         }
-
         .features-grid {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
-            gap: 24px;
+            gap: 20px;
+            max-width: 1000px;
+            margin: 0 auto;
+            width: 100%;
+            margin-top: 32px;
+            justify-self: stretch;
         }
         .feature-card {
             background: rgba(255,255,255,0.7);
             backdrop-filter: blur(20px);
             border: 1px solid rgba(255,143,171,0.2);
             border-radius: 20px;
-            padding: 32px;
+            padding: 28px;
             transition: all 0.4s ease;
             position: relative;
             overflow: hidden;
@@ -323,14 +367,14 @@
             opacity: 1;
         }
         .feature-icon {
-            width: 56px; height: 56px;
+            width: 52px; height: 52px;
             background: rgba(255,107,157,0.1);
-            border-radius: 16px;
+            border-radius: 14px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 24px;
-            margin-bottom: 20px;
+            font-size: 22px;
+            margin-bottom: 16px;
             transition: all 0.4s ease;
         }
         .feature-card:hover .feature-icon {
@@ -341,14 +385,14 @@
         .feature-title {
             font-size: 18px;
             font-weight: 600;
-            margin-bottom: 12px;
+            margin-bottom: 10px;
             color: #5a3d54;
         }
         .feature-desc {
             font-size: 14px;
             color: var(--text-secondary);
-            line-height: 1.7;
-            margin-bottom: 20px;
+            line-height: 1.6;
+            margin-bottom: 16px;
         }
         .demo-btn {
             display: inline-flex;
@@ -389,29 +433,40 @@
             box-shadow: none;
         }
 
-        /* ===== 工作原理区域 ===== */
-        .workflow {
-            padding: 100px 20px;
-            background: linear-gradient(180deg, transparent 0%, rgba(255,143,171,0.05) 100%);
+        /* ===== 工作流程卡片 ===== */
+        .workflow-card {
+            padding: 40px 60px;
+            overflow-y: auto;
+        }
+        .workflow-card::-webkit-scrollbar {
+            width: 6px;
+        }
+        .workflow-card::-webkit-scrollbar-track {
+            background: rgba(255,143,171,0.1);
+            border-radius: 3px;
+        }
+        .workflow-card::-webkit-scrollbar-thumb {
+            background: rgba(255,107,157,0.4);
+            border-radius: 3px;
         }
         .workflow-container {
-            max-width: 1000px;
+            max-width: 800px;
             margin: 0 auto;
         }
         .workflow-steps {
             display: flex;
             flex-direction: column;
-            gap: 32px;
+            gap: 24px;
         }
         .workflow-step {
             display: flex;
             align-items: flex-start;
-            gap: 24px;
+            gap: 20px;
             background: rgba(255,255,255,0.7);
             backdrop-filter: blur(20px);
             border: 1px solid rgba(255,143,171,0.2);
             border-radius: 20px;
-            padding: 28px;
+            padding: 24px;
             transition: all 0.3s ease;
         }
         .workflow-step:hover {
@@ -419,7 +474,7 @@
             transform: translateX(8px);
         }
         .step-number {
-            width: 48px; height: 48px;
+            width: 44px; height: 44px;
             background: var(--primary-gradient);
             border-radius: 50%;
             display: flex;
@@ -442,17 +497,31 @@
             line-height: 1.6;
         }
 
-        /* ===== WebUI 预览区域 ===== */
-        .webui-preview {
-            padding: 100px 20px;
-            max-width: 1200px;
-            margin: 0 auto;
+        /* ===== WebUI 预览卡片 ===== */
+        .webui-card {
+            padding: 40px 60px;
+            overflow-y: auto;
+        }
+        .webui-card::-webkit-scrollbar {
+            width: 6px;
+        }
+        .webui-card::-webkit-scrollbar-track {
+            background: rgba(255,143,171,0.1);
+            border-radius: 3px;
+        }
+        .webui-card::-webkit-scrollbar-thumb {
+            background: rgba(255,107,157,0.4);
+            border-radius: 3px;
         }
         .preview-grid {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
-            gap: 24px;
-            margin-top: 40px;
+            gap: 20px;
+            max-width: 900px;
+            margin: 0 auto;
+            margin-top: 32px;
+            width: 100%;
+            justify-self: stretch;
         }
         .preview-card {
             background: rgba(255,255,255,0.7);
@@ -468,26 +537,26 @@
             box-shadow: 0 20px 40px rgba(255,143,171,0.15);
         }
         .preview-header {
-            padding: 20px;
+            padding: 18px;
             background: var(--primary-gradient);
             color: white;
         }
         .preview-icon {
-            font-size: 24px;
-            margin-bottom: 8px;
+            font-size: 22px;
+            margin-bottom: 6px;
         }
         .preview-title {
             font-size: 16px;
             font-weight: 600;
         }
         .preview-body {
-            padding: 20px;
+            padding: 18px;
         }
         .preview-item {
             display: flex;
             align-items: center;
             gap: 10px;
-            padding: 10px 0;
+            padding: 8px 0;
             border-bottom: 1px solid rgba(255,143,171,0.15);
             font-size: 14px;
             color: var(--text-secondary);
@@ -506,15 +575,9 @@
             font-size: 10px;
         }
 
-        /* ===== 下载区域 ===== */
-        .download {
-            padding: 100px 20px;
+        /* ===== 下载卡片 ===== */
+        .download-card {
             text-align: center;
-            background: linear-gradient(135deg, rgba(255,143,171,0.05) 0%, rgba(179,157,219,0.05) 50%, rgba(255,184,195,0.05) 100%);
-        }
-        .download-container {
-            max-width: 600px;
-            margin: 0 auto;
         }
         .download-badge {
             display: inline-block;
@@ -524,10 +587,10 @@
             padding: 8px 20px;
             font-size: 14px;
             color: #ff6b9d;
-            margin-bottom: 20px;
+            margin-bottom: 24px;
         }
         .download-title {
-            font-size: 32px;
+            font-size: 36px;
             font-weight: 700;
             margin-bottom: 16px;
             color: #5a3d54;
@@ -535,60 +598,26 @@
         .download-desc {
             font-size: 16px;
             color: var(--text-secondary);
-            margin-bottom: 40px;
+            margin-bottom: 48px;
+            max-width: 500px;
         }
         .download-stats {
             display: flex;
             justify-content: center;
-            gap: 40px;
-            margin-bottom: 40px;
+            gap: 48px;
+            margin-bottom: 48px;
             font-size: 14px;
             color: var(--text-muted);
         }
 
-        /* ===== 页脚 ===== */
-        footer {
-            padding: 40px 20px;
-            border-top: 1px solid rgba(255,143,171,0.2);
-            text-align: center;
-            background: rgba(255,255,255,0.3);
+        /* ===== 动画 ===== */
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
         }
-        .footer-content {
-            max-width: 800px;
-            margin: 0 auto;
-        }
-        .footer-logo {
-            font-size: 20px;
-            font-weight: 700;
-            background: var(--primary-gradient);
-            -webkit-background-clip: text;
-            background-clip: text;
-            -webkit-text-fill-color: transparent;
-            margin-bottom: 16px;
-        }
-        .footer-links {
-            display: flex;
-            justify-content: center;
-            gap: 24px;
-            margin-bottom: 24px;
-        }
-        .footer-links a {
-            color: var(--text-muted);
-            text-decoration: none;
-            font-size: 14px;
-            transition: color 0.3s ease;
-        }
-        .footer-links a:hover {
-            color: #ff6b9d;
-        }
-        .footer-copyright {
-            font-size: 13px;
-            color: var(--text-muted);
-        }
-        .footer-author {
-            font-size: 12px;
-            color: var(--text-muted);
-            margin-top: 8px;
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
         }
 
         /* ===== 演示模态框 ===== */
@@ -661,17 +690,8 @@
             overflow: auto;
             max-height: calc(90vh - 100px);
         }
-        .modal-overlay.show {
-            overflow: hidden;
-        }
-        .modal-overlay.show ~ main,
-        .modal-overlay.show ~ footer {
-            overflow: hidden;
-            position: fixed;
-            width: 100%;
-        }
 
-        /* ===== QQ 聊天界面演示（仿真实 QQ 风格）===== */
+        /* ===== QQ 聊天界面演示 ===== */
         .qq-window {
             background: #e8e8e8;
             border-radius: 12px;
@@ -887,9 +907,6 @@
             transform: scale(1.05);
             box-shadow: 0 2px 10px rgba(102,126,234,0.4);
         }
-        .qq-send-btn:active {
-            transform: scale(0.95);
-        }
 
         /* ===== AstrBot 插件风格演示 ===== */
         .astrbot-ui {
@@ -904,13 +921,6 @@
             display: flex;
             flex-direction: column;
             height: 450px;
-        }
-        @keyframes flowBg {
-            0% { background-position: 0% 50%; }
-            25% { background-position: 100% 0%; }
-            50% { background-position: 100% 100%; }
-            75% { background-position: 0% 100%; }
-            100% { background-position: 0% 50%; }
         }
 
         .astrbot-tabs {
@@ -1082,75 +1092,94 @@
 
         /* ===== 响应式 ===== */
         @media (max-width: 768px) {
+            :root { --nav-width: 0; }
+            .sidebar { display: none; }
+            .main-content { margin-left: 0; width: 100%; }
+            .page-card { padding: 40px 20px; }
             .hero-title { font-size: 32px; }
             .hero-desc { font-size: 16px; }
             .hero-stats { gap: 30px; }
             .stat-num { font-size: 28px; }
             .section-title { font-size: 28px; }
-            .nav-links { display: none; }
-            .workflow-step { flex-direction: column; }
             .features-grid, .preview-grid { grid-template-columns: 1fr; }
             .qq-window { max-width: 100%; }
+            .workflow-step { flex-direction: column; }
         }
     </style>
 </head>
 <body>
     <div class="bg-container"></div>
 
-    <nav id="navbar">
-        <div class="nav-container">
-            <a href="#" class="logo">
-                <div class="logo-icon"></div>
-                文本审核插件
-            </a>
-            <div class="nav-links">
-                <a href="#features">功能特性</a>
-                <a href="#workflow">工作原理</a>
-                <a href="#webui">WebUI</a>
-                <a href="#download">下载</a>
-            </div>
-            <a href="https://github.com/3010232467/AI" class="nav-btn">GitHub</a>
+    <!-- 左侧导航栏 -->
+    <aside class="sidebar">
+        <div class="sidebar-logo">
+            <div class="sidebar-logo-icon"></div>
+            <div class="sidebar-logo-text">文本审核插件</div>
         </div>
-    </nav>
+        <nav class="sidebar-nav">
+            <div class="nav-item active" data-page="hero" onclick="goToPage('hero')">
+                <span class="nav-item-icon">🏠</span>
+                <span>首页</span>
+            </div>
+            <div class="nav-item" data-page="features" onclick="goToPage('features')">
+                <span class="nav-item-icon">✨</span>
+                <span>功能特性</span>
+            </div>
+            <div class="nav-item" data-page="workflow" onclick="goToPage('workflow')">
+                <span class="nav-item-icon">🔄</span>
+                <span>工作流程</span>
+            </div>
+            <div class="nav-item" data-page="webui" onclick="goToPage('webui')">
+                <span class="nav-item-icon">🌐</span>
+                <span>可视化管理</span>
+            </div>
+            <div class="nav-item" data-page="download" onclick="goToPage('download')">
+                <span class="nav-item-icon">📥</span>
+                <span>下载安装</span>
+            </div>
+        </nav>
+        <div class="sidebar-footer">
+            <div class="footer-author">👤 吃糖吃没了 · 🤖 AI 辅助开发</div>
+        </div>
+    </aside>
 
-    <main>
-        <!-- Hero -->
-        <section class="hero">
-            <div class="hero-content">
-                <div class="hero-tagline">AstrBot 插件 · v1.3.0</div>
-                <h1 class="hero-title">
-                    智能文本审核<br><span>守护群聊环境</span>
-                </h1>
-                <p class="hero-desc">
-                    基于关键词检测与 AI 语义分析的双重审核系统，智能识别隐晦表达、阴阳怪气，实现分级管控与自动惩罚。让你的群聊环境更加安全、和谐。
-                </p>
-                <div class="hero-buttons">
-                    <a href="https://github.com/3010232467/AI/releases/tag/v1.3.0" class="btn-primary">
-                        📥 下载安装
-                    </a>
-                    <a href="#features" class="btn-secondary">
-                        了解更多
-                    </a>
+    <!-- 主内容区 -->
+    <main class="main-content" id="main-content">
+        <!-- Hero 卡片 -->
+        <section class="page-card active hero-card" id="page-hero">
+            <div class="hero-tagline">AstrBot 插件 · v1.3.0</div>
+            <h1 class="hero-title">
+                智能文本审核<br><span>守护群聊环境</span>
+            </h1>
+            <p class="hero-desc">
+                基于关键词检测与 AI 语义分析的双重审核系统，智能识别隐晦表达、阴阳怪气，实现分级管控与自动惩罚。让你的群聊环境更加安全、和谐。
+            </p>
+            <div class="hero-buttons">
+                <a href="https://github.com/3010232467/AI/releases/tag/v1.3.0" class="btn-primary">
+                    📥 下载安装
+                </a>
+                <a href="#" class="btn-secondary" onclick="goToPage('features')">
+                    了解更多
+                </a>
+            </div>
+            <div class="hero-stats">
+                <div class="stat-item">
+                    <div class="stat-num">5+</div>
+                    <div class="stat-label">检测类型</div>
                 </div>
-                <div class="hero-stats">
-                    <div class="stat-item">
-                        <div class="stat-num">5+</div>
-                        <div class="stat-label">检测类型</div>
-                    </div>
-                    <div class="stat-item">
-                        <div class="stat-num">60天</div>
-                        <div class="stat-label">数据统计</div>
-                    </div>
-                    <div class="stat-item">
-                        <div class="stat-num">10+</div>
-                        <div class="stat-label">支持平台</div>
-                    </div>
+                <div class="stat-item">
+                    <div class="stat-num">60天</div>
+                    <div class="stat-label">数据统计</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-num">10+</div>
+                    <div class="stat-label">支持平台</div>
                 </div>
             </div>
         </section>
 
-        <!-- Features -->
-        <section id="features" class="features">
+        <!-- 功能特性卡片 -->
+        <section class="page-card features-card" id="page-features">
             <div class="section-header">
                 <div class="section-subtitle">Features</div>
                 <h2 class="section-title">强大的功能特性</h2>
@@ -1219,8 +1248,8 @@
             </div>
         </section>
 
-        <!-- Workflow -->
-        <section id="workflow" class="workflow">
+        <!-- 工作流程卡片 -->
+        <section class="page-card workflow-card" id="page-workflow">
             <div class="workflow-container">
                 <div class="section-header">
                     <div class="section-subtitle">Workflow</div>
@@ -1267,8 +1296,8 @@
             </div>
         </section>
 
-        <!-- WebUI Preview -->
-        <section id="webui" class="webui-preview">
+        <!-- WebUI 预览卡片 -->
+        <section class="page-card webui-card" id="page-webui">
             <div class="section-header">
                 <div class="section-subtitle">WebUI</div>
                 <h2 class="section-title">可视化管理界面</h2>
@@ -1326,41 +1355,26 @@
             </div>
         </section>
 
-        <!-- Download -->
-        <section id="download" class="download">
-            <div class="download-container">
-                <div class="download-badge">Latest Release · v1.3.0</div>
-                <h2 class="download-title">立即下载安装</h2>
-                <p class="download-desc">支持 QQ、Telegram、Discord、飞书等多个平台，一键安装即可使用</p>
-                <div class="download-stats">
-                    <span>📦 插件大小：170 KB</span>
-                    <span>✨ 更新日期：2026-07-24</span>
-                    <span>📱 支持平台：10+</span>
-                </div>
-                <div class="hero-buttons">
-                    <a href="https://github.com/3010232467/AI/releases/tag/v1.3.0" class="btn-primary">
-                        📥 下载插件 (ZIP)
-                    </a>
-                    <a href="https://github.com/3010232467/AI" class="btn-secondary">
-                        查看源码
-                    </a>
-                </div>
+        <!-- 下载卡片 -->
+        <section class="page-card download-card" id="page-download">
+            <div class="download-badge">Latest Release · v1.3.0</div>
+            <h2 class="download-title">立即下载安装</h2>
+            <p class="download-desc">支持 QQ、Telegram、Discord、飞书等多个平台，一键安装即可使用</p>
+            <div class="download-stats">
+                <span>📦 插件大小：170 KB</span>
+                <span>✨ 更新日期：2026-07-24</span>
+                <span>📱 支持平台：10+</span>
+            </div>
+            <div class="hero-buttons">
+                <a href="https://github.com/3010232467/AI/releases/tag/v1.3.0" class="btn-primary">
+                    📥 下载插件 (ZIP)
+                </a>
+                <a href="https://github.com/3010232467/AI" class="btn-secondary">
+                    查看源码
+                </a>
             </div>
         </section>
     </main>
-
-    <footer>
-        <div class="footer-content">
-            <div class="footer-logo">文本审核插件</div>
-            <div class="footer-links">
-                <a href="https://github.com/3010232467/AI">GitHub</a>
-                <a href="https://github.com/3010232467/AI/releases">Releases</a>
-                <a href="https://github.com/3010232467/AI/blob/main/CHANGELOG.md">更新日志</a>
-            </div>
-            <div class="footer-copyright">© 2026 AstrBot Text Moderation Plugin</div>
-            <div class="footer-author">👤 吃糖吃没了 · 🤖 AI 辅助开发</div>
-        </div>
-    </footer>
 
     <!-- 演示模态框 -->
     <div class="modal-overlay" id="demo-modal">
@@ -1376,22 +1390,123 @@
     </div>
 
     <script>
-        // 导航栏滚动效果
-        const navbar = document.getElementById('navbar');
-        window.addEventListener('scroll', () => {
-            navbar.classList.toggle('scrolled', window.scrollY > 50);
+        // ===== 页面导航 =====
+        const pages = ['hero', 'features', 'workflow', 'webui', 'download'];
+        let currentPage = 0;
+        // 保存每个页面的滚动位置
+        const scrollPositions = {};
+        pages.forEach(page => scrollPositions[page] = 0);
+        
+        // 监听每个页面的滚动事件，实时保存滚动位置
+        pages.forEach(pageId => {
+            const page = document.getElementById('page-' + pageId);
+            if (page) {
+                page.addEventListener('scroll', () => {
+                    scrollPositions[pageId] = page.scrollTop;
+                });
+            }
         });
 
-        // 平滑滚动
-        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-            anchor.addEventListener('click', e => {
-                e.preventDefault();
-                const target = document.querySelector(anchor.getAttribute('href'));
-                if (target) target.scrollIntoView({ behavior: 'smooth' });
+        // 初始化页面状态
+        function initPages() {
+            pages.forEach((pageId, index) => {
+                const page = document.getElementById('page-' + pageId);
+                if (page) {
+                    if (index === 0) {
+                        page.classList.add('active');
+                        page.classList.remove('next', 'prev');
+                    } else {
+                        page.classList.add('next');
+                        page.classList.remove('active', 'prev');
+                    }
+                }
             });
+        }
+
+        // 页面加载完成后初始化
+        document.addEventListener('DOMContentLoaded', initPages);
+
+        function goToPage(pageId) {
+            const index = pages.indexOf(pageId);
+            if (index === -1 || index === currentPage) return;
+
+            const prevPageId = pages[currentPage];
+            const prevPage = document.getElementById('page-' + prevPageId);
+            const currPage = document.getElementById('page-' + pageId);
+            const navItems = document.querySelectorAll('.nav-item');
+
+            // 保存当前页面的滚动位置（在切换类之前保存）
+            const savedScrollTop = prevPage.scrollTop;
+            scrollPositions[prevPageId] = savedScrollTop;
+
+            if (index > currentPage) {
+                prevPage.classList.add('prev');
+                prevPage.classList.remove('active');
+                currPage.classList.add('active');
+                currPage.classList.remove('next');
+            } else {
+                prevPage.classList.add('next');
+                prevPage.classList.remove('active');
+                currPage.classList.add('active');
+                currPage.classList.remove('prev');
+            }
+
+            navItems.forEach((item, i) => {
+                item.classList.toggle('active', i === index);
+            });
+
+            currentPage = index;
+            
+            // 恢复目标页面的滚动位置
+            setTimeout(() => {
+                currPage.scrollTop = scrollPositions[pageId];
+            }, 100);
+        }
+
+        // 滚轮滚动切换页面 - 智能滚动逻辑
+        let isScrolling = false;
+        document.getElementById('main-content').addEventListener('wheel', (e) => {
+            if (isScrolling) return;
+
+            const currPage = document.getElementById('page-' + pages[currentPage]);
+            
+            // 检查当前页面是否可以继续滚动（添加10px容差）
+            const scrollBottom = currPage.scrollHeight - currPage.clientHeight;
+            const canScrollDown = currPage.scrollTop < scrollBottom - 10;
+            const canScrollUp = currPage.scrollTop > 10;
+
+            const delta = e.deltaY > 0 ? 1 : -1;
+
+            // 如果页面可以继续滚动，则允许内部滚动
+            if ((delta > 0 && canScrollDown) || (delta < 0 && canScrollUp)) {
+                return; // 允许浏览器默认滚动行为
+            }
+
+            // 到达边界，切换页面
+            isScrolling = true;
+            const newIndex = currentPage + delta;
+
+            if (newIndex >= 0 && newIndex < pages.length) {
+                goToPage(pages[newIndex]);
+            }
+
+            setTimeout(() => { isScrolling = false; }, 700);
+        }, { passive: false });
+
+        // 键盘方向键切换
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowDown' || e.key === 'PageDown') {
+                if (currentPage < pages.length - 1) {
+                    goToPage(pages[currentPage + 1]);
+                }
+            } else if (e.key === 'ArrowUp' || e.key === 'PageUp') {
+                if (currentPage > 0) {
+                    goToPage(pages[currentPage - 1]);
+                }
+            }
         });
 
-        // 演示模态框
+        // ===== 演示模态框 =====
         const modalOverlay = document.getElementById('demo-modal');
         const modalTitle = document.getElementById('modal-title');
         const modalBody = document.getElementById('modal-body');
@@ -1423,10 +1538,6 @@
                 clearInterval(demoInterval);
                 demoInterval = null;
             }
-            // 清理滚动状态
-            Object.keys(scrollStates).forEach(id => {
-                delete scrollStates[id];
-            });
         }
 
         function getDemoTitle(type) {
@@ -1506,7 +1617,6 @@
                 `,
                 'records': `
                     <div class="demo-pages" id="records-pages">
-                        <!-- 第一页：群聊消息演示 -->
                         <div class="demo-page active" id="records-page-1">
                             <div class="qq-window" style="height: 100%; width: 100%; max-width: 500px;">
                                 <div class="qq-top-bar">
@@ -1521,7 +1631,6 @@
                                 </div>
                             </div>
                         </div>
-                        <!-- 第二页：违规记录详情 -->
                         <div class="demo-page" id="records-page-2">
                             <div class="astrbot-ui" style="height: 100%; width: 100%; max-width: 700px;">
                                 <div class="astrbot-tabs">
@@ -1706,9 +1815,6 @@
             return contents[type] || `<div style="text-align:center;padding:40px;">该功能演示开发中...</div>`;
         }
 
-        // 滚动控制状态 - 简化版：用户滚动后3秒内不自动滚动
-        const scrollStates = {};
-
         // 页面切换函数
         let currentRecordsPage = 1;
         function switchRecordsPage(pageNum) {
@@ -1739,31 +1845,27 @@
             currentRecordsPage = pageNum;
         }
 
-        // 延迟函数
         function delay(ms) {
             return new Promise(resolve => setTimeout(resolve, ms));
         }
-        
+
+        const scrollStates = {};
+
         function initScrollState(containerId) {
             const container = document.getElementById(containerId);
             if (!container) return;
             
-            // 如果已有状态，重置
             if (scrollStates[containerId]) {
                 scrollStates[containerId].isUserScrolling = false;
                 return;
             }
             
-            scrollStates[containerId] = {
-                isUserScrolling: false
-            };
+            scrollStates[containerId] = { isUserScrolling: false };
             
-            // 监听用户滚动，阻止事件冒泡到主页面
             container.addEventListener('wheel', (e) => {
                 e.stopPropagation();
                 if (scrollStates[containerId]) {
                     scrollStates[containerId].isUserScrolling = true;
-                    // 3秒后恢复自动滚动
                     setTimeout(() => {
                         if (scrollStates[containerId]) {
                             scrollStates[containerId].isUserScrolling = false;
@@ -1777,11 +1879,7 @@
             const container = document.getElementById(containerId);
             const msg = document.createElement('div');
             msg.className = `qq-msg ${type}${isBlocked ? ' blocked' : ''}`;
-            const avatars = {
-                'me': '👤',
-                'others': '🧑',
-                'bot': '🤖'
-            };
+            const avatars = { 'me': '👤', 'others': '🧑', 'bot': '🤖' };
             msg.innerHTML = `
                 <div class="qq-avatar">${avatars[type] || '🧑'}</div>
                 <div class="qq-msg-content">
@@ -1790,11 +1888,7 @@
                 </div>
             `;
             container.appendChild(msg);
-            
-            // 初始化滚动状态
             initScrollState(containerId);
-            
-            // 自动滚动到底部，除非用户正在手动滚动
             setTimeout(() => {
                 const state = scrollStates[containerId];
                 if (!state || !state.isUserScrolling) {
@@ -1806,40 +1900,21 @@
         async function runDualDetectionDemo() {
             const chat = document.getElementById('dual-chat');
             chat.innerHTML = '';
-            
             addQQMessage('dual-chat', 'bot', '文本审核', '🔍 文本审核插件已启用');
             addQQMessage('dual-chat', 'others', '管理员', '大家好！欢迎来到二次元交流群，请文明发言~');
             await delay(800);
-
             addQQMessage('dual-chat', 'me', '我', '今天天气真好啊');
             await delay(600);
-
             await delay(1000);
             addQQMessage('dual-chat', 'me', '我', '傻逼去死吧');
             await delay(600);
-            addQQMessage('dual-chat', 'bot', '文本审核', `🚫 检测到严重违规内容！消息已撤回
-
-━━━━━━━━━━━━━━━
-📋 违规等级：🔴 严重违规
-📝 违规内容：傻逼
-⚖️ 惩罚力度：累计 1/2 次后将踢出群聊
-━━━━━━━━━━━━━━━`);
-
+            addQQMessage('dual-chat', 'bot', '文本审核', `🚫 检测到严重违规内容！消息已撤回\n\n━━━━━━━━━━━━━━━\n📋 违规等级：🔴 严重违规\n📝 违规内容：傻逼\n⚖️ 惩罚力度：累计 1/2 次后将踢出群聊\n━━━━━━━━━━━━━━━`);
             await delay(1500);
             addQQMessage('dual-chat', 'me', '我', '大调查小萝莉');
             await delay(800);
             addQQMessage('dual-chat', 'bot', '文本审核', '🧠 AI 正在分析语义...');
             await delay(1500);
-            addQQMessage('dual-chat', 'bot', '文本审核', `🚫 检测到严重违规内容！消息已撤回
-
-━━━━━━━━━━━━━━━
-📋 违规等级：🔴 严重违规
-📌 违规类型：性暗示未成年
-⚖️ 惩罚力度：累计 2/2 次后将踢出群聊
-━━━━━━━━━━━━━━━
-
-👢 用户 123456 因严重违规已被踢出群`);
-            
+            addQQMessage('dual-chat', 'bot', '文本审核', `🚫 检测到严重违规内容！消息已撤回\n\n━━━━━━━━━━━━━━━\n📋 违规等级：🔴 严重违规\n📌 违规类型：性暗示未成年\n⚖️ 惩罚力度：累计 2/2 次后将踢出群聊\n━━━━━━━━━━━━━━━\n\n👢 用户 123456 因严重违规已被踢出群`);
             await delay(1000);
         }
 
@@ -1847,105 +1922,53 @@
             const chat = document.getElementById('ai-chat');
             const wordList = document.getElementById('ai-word-list');
             chat.innerHTML = '';
-            wordList.innerHTML = `
-                <div class="astrbot-word-tag">傻逼</div>
-                <div class="astrbot-word-tag">操你妈</div>
-                <div class="astrbot-word-tag">色情</div>
-            `;
-
+            wordList.innerHTML = `<div class="astrbot-word-tag">傻逼</div><div class="astrbot-word-tag">操你妈</div><div class="astrbot-word-tag">色情</div>`;
             addQQMessage('ai-chat', 'bot', '文本审核', '🧠 AI 自动学习已启用');
             await delay(800);
-
             addQQMessage('ai-chat', 'me', '用户A', '香草萝莉真可爱');
             await delay(600);
             addQQMessage('ai-chat', 'bot', '文本审核', '🧠 AI 正在分析语义...');
             await delay(1200);
-            addQQMessage('ai-chat', 'bot', '文本审核', `🚫 检测到严重违规内容！消息已撤回
-
-━━━━━━━━━━━━━━━
-📋 违规等级：🔴 严重违规
-📌 违规类型：性暗示未成年
-⚖️ 惩罚力度：累计 1/2 次后将踢出群聊
-━━━━━━━━━━━━━━━`);
+            addQQMessage('ai-chat', 'bot', '文本审核', `🚫 检测到严重违规内容！消息已撤回\n\n━━━━━━━━━━━━━━━\n📋 违规等级：🔴 严重违规\n📌 违规类型：性暗示未成年\n⚖️ 惩罚力度：累计 1/2 次后将踢出群聊\n━━━━━━━━━━━━━━━`);
             await delay(800);
             addQQMessage('ai-chat', 'bot', '文本审核', '💡 AI 自动提取违规词：香草萝莉 → 添加到词库');
-
             wordList.innerHTML += `<div class="astrbot-word-tag new">香草萝莉</div>`;
             await delay(1200);
-
             addQQMessage('ai-chat', 'me', '用户B', '香草萝莉真可爱');
             await delay(600);
-            addQQMessage('ai-chat', 'bot', '文本审核', `🚫 检测到严重违规内容！消息已撤回
-
-━━━━━━━━━━━━━━━
-📋 违规等级：🔴 严重违规
-📝 违规内容：香草萝莉
-⚖️ 惩罚力度：累计 1/2 次后将踢出群聊
-━━━━━━━━━━━━━━━`);
-            
+            addQQMessage('ai-chat', 'bot', '文本审核', `🚫 检测到严重违规内容！消息已撤回\n\n━━━━━━━━━━━━━━━\n📋 违规等级：🔴 严重违规\n📝 违规内容：香草萝莉\n⚖️ 惩罚力度：累计 1/2 次后将踢出群聊\n━━━━━━━━━━━━━━━`);
             await delay(1000);
         }
 
         async function runGradingDemo() {
             const chat = document.getElementById('grading-chat');
             chat.innerHTML = '';
-
             addQQMessage('grading-chat', 'bot', '文本审核', '⚖️ 分级管控：BLOCK/WARNING/SAFE');
             await delay(800);
-
             addQQMessage('grading-chat', 'me', '用户', '今天晚上一起吃饭吧');
             await delay(600);
-
             await delay(1000);
             addQQMessage('grading-chat', 'me', '用户', '你这个人真烦人');
             await delay(600);
-            addQQMessage('grading-chat', 'bot', '文本审核', `💡 检测到轻度违规内容！消息已撤回
-
-━━━━━━━━━━━━━━━
-📋 违规等级：🟡 轻度违规
-📝 违规内容：烦人
-⚖️ 惩罚力度：仅警告，不计入惩罚次数
-━━━━━━━━━━━━━━━
-
-请文明用语，避免再次违规。`);
-
+            addQQMessage('grading-chat', 'bot', '文本审核', `💡 检测到轻度违规内容！消息已撤回\n\n━━━━━━━━━━━━━━━\n📋 违规等级：🟡 轻度违规\n📝 违规内容：烦人\n⚖️ 惩罚力度：仅警告，不计入惩罚次数\n━━━━━━━━━━━━━━━\n\n请文明用语，避免再次违规。`);
             await delay(1200);
             addQQMessage('grading-chat', 'me', '用户', '操你妈去死');
             await delay(600);
-            addQQMessage('grading-chat', 'bot', '文本审核', `🚫 检测到严重违规内容！消息已撤回
-
-━━━━━━━━━━━━━━━
-📋 违规等级：🔴 严重违规
-📝 违规内容：操你妈
-⚖️ 惩罚力度：累计 1/2 次后将踢出群聊
-━━━━━━━━━━━━━━━`);
-            
+            addQQMessage('grading-chat', 'bot', '文本审核', `🚫 检测到严重违规内容！消息已撤回\n\n━━━━━━━━━━━━━━━\n📋 违规等级：🔴 严重违规\n📝 违规内容：操你妈\n⚖️ 惩罚力度：累计 1/2 次后将踢出群聊\n━━━━━━━━━━━━━━━`);
             await delay(1000);
         }
 
         async function runSarcasmDemo() {
             const chat = document.getElementById('sarcasm-chat');
             chat.innerHTML = '';
-
             addQQMessage('sarcasm-chat', 'bot', '文本审核', '🎯 智能区分「对事」与「对人」');
             await delay(800);
-
             addQQMessage('sarcasm-chat', 'me', '用户', '这电影拍得真烂');
             await delay(600);
-
             await delay(1000);
             addQQMessage('sarcasm-chat', 'me', '用户', '你怕不是个傻子吧');
             await delay(600);
-            addQQMessage('sarcasm-chat', 'bot', '文本审核', `💡 检测到轻度违规内容！消息已撤回
-
-━━━━━━━━━━━━━━━━
-📋 违规等级：🟡 轻度违规
-📌 违规类型：人身攻击
-⚖️ 惩罚力度：仅警告，不计入惩罚次数
-━━━━━━━━━━━━━━━━
-
-请文明用语，避免再次违规。`);
-            
+            addQQMessage('sarcasm-chat', 'bot', '文本审核', `💡 检测到轻度违规内容！消息已撤回\n\n━━━━━━━━━━━━━━━━\n📋 违规等级：🟡 轻度违规\n📌 违规类型：人身攻击\n⚖️ 惩罚力度：仅警告，不计入惩罚次数\n━━━━━━━━━━━━━━━━\n\n请文明用语，避免再次违规。`);
             await delay(1000);
         }
 
@@ -1965,95 +1988,46 @@
             addQQMessage('records-chat', 'bot', '文本审核', '🔍 文本审核插件已启用');
             await delay(600);
 
-            // 第一条违规
             addQQMessage('records-chat', 'me', '用户A', '傻逼去死吧');
             await delay(500);
-            addQQMessage('records-chat', 'bot', '文本审核', `🚫 检测到严重违规内容！消息已撤回
-
-━━━━━━━━━━━━━━━
-📋 违规等级：🔴 严重违规
-📝 违规内容：傻逼
-⚖️ 惩罚力度：累计 1/2 次后将踢出群聊
-━━━━━━━━━━━━━━━`);
+            addQQMessage('records-chat', 'bot', '文本审核', `🚫 检测到严重违规内容！消息已撤回\n\n━━━━━━━━━━━━━━━\n📋 违规等级：🔴 严重违规\n📝 违规内容：傻逼\n⚖️ 惩罚力度：累计 1/2 次后将踢出群聊\n━━━━━━━━━━━━━━━`);
             
             await delay(400);
             const row1 = document.createElement('tr');
             row1.style.opacity = '0';
             row1.style.animation = 'fadeIn 0.3s ease forwards';
-            row1.innerHTML = `
-                <td style="padding: 10px; border-bottom: 1px solid #ffe4e1; white-space: nowrap; color: #333;">${new Date().toLocaleString()}</td>
-                <td style="padding: 10px; border-bottom: 1px solid #ffe4e1; color: #333;">用户A</td>
-                <td style="padding: 10px; border-bottom: 1px solid #ffe4e1; color: #333;">12345678</td>
-                <td style="padding: 10px; font-weight: 700; color: #c2185b; border-bottom: 1px solid #ffe4e1;">🔴 严重</td>
-                <td style="padding: 10px; border-bottom: 1px solid #ffe4e1; color: #333;"><span style="padding: 2px 8px; border-radius: 10px; font-size: 11px; font-weight: 600; background: rgba(255,107,157,0.15); color: #c2185b;">关键词</span></td>
-                <td style="padding: 10px; border-bottom: 1px solid #ffe4e1; max-width: 150px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: #333;">傻逼去死吧</td>
-                <td style="padding: 10px; border-bottom: 1px solid #ffe4e1; max-width: 150px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: #333;">辱骂他人</td>
-            `;
+            row1.innerHTML = `<td style="padding: 10px; border-bottom: 1px solid #ffe4e1; white-space: nowrap; color: #333;">${new Date().toLocaleString()}</td><td style="padding: 10px; border-bottom: 1px solid #ffe4e1; color: #333;">用户A</td><td style="padding: 10px; border-bottom: 1px solid #ffe4e1; color: #333;">12345678</td><td style="padding: 10px; font-weight: 700; color: #c2185b; border-bottom: 1px solid #ffe4e1;">🔴 严重</td><td style="padding: 10px; border-bottom: 1px solid #ffe4e1; color: #333;"><span style="padding: 2px 8px; border-radius: 10px; font-size: 11px; font-weight: 600; background: rgba(255,107,157,0.15); color: #c2185b;">关键词</span></td><td style="padding: 10px; border-bottom: 1px solid #ffe4e1; max-width: 150px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: #333;">傻逼去死吧</td><td style="padding: 10px; border-bottom: 1px solid #ffe4e1; max-width: 150px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: #333;">辱骂他人</td>`;
             tbody.appendChild(row1);
 
             await delay(1000);
 
-            // 第二条违规
             addQQMessage('records-chat', 'me', '用户B', '你脑子有问题');
             await delay(500);
-            addQQMessage('records-chat', 'bot', '文本审核', `💡 检测到轻度违规内容！消息已撤回
-
-━━━━━━━━━━━━━━━
-📋 违规等级：🟡 轻度违规
-📝 违规内容：脑子有问题
-⚖️ 惩罚力度：仅警告，不计入惩罚次数
-━━━━━━━━━━━━━━━`);
+            addQQMessage('records-chat', 'bot', '文本审核', `💡 检测到轻度违规内容！消息已撤回\n\n━━━━━━━━━━━━━━━\n📋 违规等级：🟡 轻度违规\n📝 违规内容：脑子有问题\n⚖️ 惩罚力度：仅警告，不计入惩罚次数\n━━━━━━━━━━━━━━━`);
 
             await delay(400);
             const row2 = document.createElement('tr');
             row2.style.opacity = '0';
             row2.style.animation = 'fadeIn 0.3s ease forwards';
-            row2.innerHTML = `
-                <td style="padding: 10px; border-bottom: 1px solid #ffe4e1; white-space: nowrap; color: #333;">${new Date().toLocaleString()}</td>
-                <td style="padding: 10px; border-bottom: 1px solid #ffe4e1; color: #333;">用户B</td>
-                <td style="padding: 10px; border-bottom: 1px solid #ffe4e1; color: #333;">12345678</td>
-                <td style="padding: 10px; font-weight: 700; color: #ef6c00; border-bottom: 1px solid #ffe4e1;">🟡 轻度</td>
-                <td style="padding: 10px; border-bottom: 1px solid #ffe4e1; color: #333;"><span style="padding: 2px 8px; border-radius: 10px; font-size: 11px; font-weight: 600; background: rgba(179,157,219,0.2); color: #7b1fa2;">AI</span></td>
-                <td style="padding: 10px; border-bottom: 1px solid #ffe4e1; max-width: 150px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: #333;">你脑子有问题</td>
-                <td style="padding: 10px; border-bottom: 1px solid #ffe4e1; max-width: 150px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: #333;">人身攻击</td>
-            `;
+            row2.innerHTML = `<td style="padding: 10px; border-bottom: 1px solid #ffe4e1; white-space: nowrap; color: #333;">${new Date().toLocaleString()}</td><td style="padding: 10px; border-bottom: 1px solid #ffe4e1; color: #333;">用户B</td><td style="padding: 10px; border-bottom: 1px solid #ffe4e1; color: #333;">12345678</td><td style="padding: 10px; font-weight: 700; color: #ef6c00; border-bottom: 1px solid #ffe4e1;">🟡 轻度</td><td style="padding: 10px; border-bottom: 1px solid #ffe4e1; color: #333;"><span style="padding: 2px 8px; border-radius: 10px; font-size: 11px; font-weight: 600; background: rgba(179,157,219,0.2); color: #7b1fa2;">AI</span></td><td style="padding: 10px; border-bottom: 1px solid #ffe4e1; max-width: 150px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: #333;">你脑子有问题</td><td style="padding: 10px; border-bottom: 1px solid #ffe4e1; max-width: 150px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: #333;">人身攻击</td>`;
             tbody.appendChild(row2);
 
             await delay(1000);
 
-            // 第三条违规
             addQQMessage('records-chat', 'me', '用户A', '大调查小萝莉');
             await delay(500);
             addQQMessage('records-chat', 'bot', '文本审核', '🧠 AI 正在分析语义...');
             await delay(800);
-            addQQMessage('records-chat', 'bot', '文本审核', `🚫 检测到严重违规内容！消息已撤回
-
-━━━━━━━━━━━━━━━
-📋 违规等级：🔴 严重违规
-📌 违规类型：性暗示未成年
-⚖️ 惩罚力度：累计 2/2 次后将踢出群聊
-━━━━━━━━━━━━━━━
-
-👢 用户A 因严重违规已被踢出群`);
+            addQQMessage('records-chat', 'bot', '文本审核', `🚫 检测到严重违规内容！消息已撤回\n\n━━━━━━━━━━━━━━━\n📋 违规等级：🔴 严重违规\n📌 违规类型：性暗示未成年\n⚖️ 惩罚力度：累计 2/2 次后将踢出群聊\n━━━━━━━━━━━━━━━\n\n👢 用户A 因严重违规已被踢出群`);
 
             await delay(400);
             const row3 = document.createElement('tr');
             row3.style.opacity = '0';
             row3.style.animation = 'fadeIn 0.3s ease forwards';
-            row3.innerHTML = `
-                <td style="padding: 10px; border-bottom: 1px solid #ffe4e1; white-space: nowrap; color: #333;">${new Date().toLocaleString()}</td>
-                <td style="padding: 10px; border-bottom: 1px solid #ffe4e1; color: #333;">用户A</td>
-                <td style="padding: 10px; border-bottom: 1px solid #ffe4e1; color: #333;">12345678</td>
-                <td style="padding: 10px; font-weight: 700; color: #c2185b; border-bottom: 1px solid #ffe4e1;">🔴 严重</td>
-                <td style="padding: 10px; border-bottom: 1px solid #ffe4e1; color: #333;"><span style="padding: 2px 8px; border-radius: 10px; font-size: 11px; font-weight: 600; background: rgba(179,157,219,0.2); color: #7b1fa2;">AI</span></td>
-                <td style="padding: 10px; border-bottom: 1px solid #ffe4e1; max-width: 150px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: #333;">大调查小萝莉</td>
-                <td style="padding: 10px; border-bottom: 1px solid #ffe4e1; max-width: 150px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: #333;">性暗示未成年</td>
-            `;
+            row3.innerHTML = `<td style="padding: 10px; border-bottom: 1px solid #ffe4e1; white-space: nowrap; color: #333;">${new Date().toLocaleString()}</td><td style="padding: 10px; border-bottom: 1px solid #ffe4e1; color: #333;">用户A</td><td style="padding: 10px; border-bottom: 1px solid #ffe4e1; color: #333;">12345678</td><td style="padding: 10px; font-weight: 700; color: #c2185b; border-bottom: 1px solid #ffe4e1;">🔴 严重</td><td style="padding: 10px; border-bottom: 1px solid #ffe4e1; color: #333;"><span style="padding: 2px 8px; border-radius: 10px; font-size: 11px; font-weight: 600; background: rgba(179,157,219,0.2); color: #7b1fa2;">AI</span></td><td style="padding: 10px; border-bottom: 1px solid #ffe4e1; max-width: 150px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: #333;">大调查小萝莉</td><td style="padding: 10px; border-bottom: 1px solid #ffe4e1; max-width: 150px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: #333;">性暗示未成年</td>`;
             tbody.appendChild(row3);
             
             await delay(1500);
-            
-            // 演示完成，自动切换到违规记录页面
             addQQMessage('records-chat', 'bot', '文本审核', '📊 违规记录已更新，正在跳转查看详情...');
             await delay(800);
             switchRecordsPage(2);
@@ -2063,17 +2037,8 @@
             const wordList1 = document.getElementById('webui-word-list');
             const wordList2 = document.getElementById('webui-word-list-2');
             
-            wordList1.innerHTML = `
-                <div class="astrbot-word-tag">傻逼</div>
-                <div class="astrbot-word-tag">操你妈</div>
-                <div class="astrbot-word-tag">色情</div>
-                <div class="astrbot-word-tag">毒品</div>
-            `;
-            wordList2.innerHTML = `
-                <div class="astrbot-word-tag">傻子</div>
-                <div class="astrbot-word-tag">笨蛋</div>
-                <div class="astrbot-word-tag">烦人</div>
-            `;
+            wordList1.innerHTML = `<div class="astrbot-word-tag">傻逼</div><div class="astrbot-word-tag">操你妈</div><div class="astrbot-word-tag">色情</div><div class="astrbot-word-tag">毒品</div>`;
+            wordList2.innerHTML = `<div class="astrbot-word-tag">傻子</div><div class="astrbot-word-tag">笨蛋</div><div class="astrbot-word-tag">烦人</div>`;
 
             await delay(1000);
             wordList1.innerHTML += `<div class="astrbot-word-tag new">香草萝莉</div>`;
@@ -2084,14 +2049,9 @@
 
         async function runAdminDemo() {
             const adminList = document.getElementById('admin-list');
-            adminList.innerHTML = `
-                <div class="astrbot-word-tag">123456</div>
-                <div class="astrbot-word-tag">789012</div>
-            `;
-
+            adminList.innerHTML = `<div class="astrbot-word-tag">123456</div><div class="astrbot-word-tag">789012</div>`;
             await delay(1000);
             adminList.innerHTML += `<div class="astrbot-word-tag new">345678</div>`;
-            
             await delay(1000);
         }
 
@@ -2146,23 +2106,10 @@
 
             addQQMessage('notify-group-chat', 'me', '用户A', '傻逼去死吧');
             await delay(500);
-            addQQMessage('notify-group-chat', 'bot', '文本审核', `🚫 检测到严重违规内容！消息已撤回
-
-━━━━━━━━━━━━━━━
-📋 违规等级：🔴 严重违规
-📝 违规内容：傻逼
-⚖️ 惩罚力度：累计 1/2 次后将踢出群聊
-━━━━━━━━━━━━━━━`);
+            addQQMessage('notify-group-chat', 'bot', '文本审核', `🚫 检测到严重违规内容！消息已撤回\n\n━━━━━━━━━━━━━━━\n📋 违规等级：🔴 严重违规\n📝 违规内容：傻逼\n⚖️ 惩罚力度：累计 1/2 次后将踢出群聊\n━━━━━━━━━━━━━━━`);
 
             await delay(600);
-            addQQMessage('notify-private-chat', 'bot', '文本审核', `🔴 文本审核违规通知
-━━━━━━━━━━━━━━━
-👤 用户ID: 用户A
-👥 群号: 二次元交流群
-📋 违规等级: 严重违规
-📝 违规内容: 傻逼去死吧
-⚠️ 违规原因: 匹配到违禁词
-⏰ 时间: ${new Date().toLocaleString()}`);
+            addQQMessage('notify-private-chat', 'bot', '文本审核', `🔴 文本审核违规通知\n━━━━━━━━━━━━━━━\n👤 用户ID: 用户A\n👥 群号: 二次元交流群\n📋 违规等级: 严重违规\n📝 违规内容: 傻逼去死吧\n⚠️ 违规原因: 匹配到违禁词\n⏰ 时间: ${new Date().toLocaleString()}`);
 
             await delay(1000);
 
@@ -2170,23 +2117,10 @@
             await delay(500);
             addQQMessage('notify-group-chat', 'bot', '文本审核', '🧠 AI 正在分析语义...');
             await delay(800);
-            addQQMessage('notify-group-chat', 'bot', '文本审核', `🚫 检测到严重违规内容！消息已撤回
-
-━━━━━━━━━━━━━━━
-📋 违规等级：🔴 严重违规
-📌 违规类型：性暗示未成年
-⚖️ 惩罚力度：累计 1/2 次后将踢出群聊
-━━━━━━━━━━━━━━━`);
+            addQQMessage('notify-group-chat', 'bot', '文本审核', `🚫 检测到严重违规内容！消息已撤回\n\n━━━━━━━━━━━━━━━\n📋 违规等级：🔴 严重违规\n📌 违规类型：性暗示未成年\n⚖️ 惩罚力度：累计 1/2 次后将踢出群聊\n━━━━━━━━━━━━━━━`);
 
             await delay(600);
-            addQQMessage('notify-private-chat', 'bot', '文本审核', `🔴 文本审核违规通知
-━━━━━━━━━━━━━━━
-👤 用户ID: 用户B
-👥 群号: 二次元交流群
-📋 违规等级: 严重违规
-📝 违规内容: 大调查小萝莉
-⚠️ 违规原因: AI识别到性暗示未成年
-⏰ 时间: ${new Date().toLocaleString()}`);
+            addQQMessage('notify-private-chat', 'bot', '文本审核', `🔴 文本审核违规通知\n━━━━━━━━━━━━━━━\n👤 用户ID: 用户B\n👥 群号: 二次元交流群\n📋 违规等级: 严重违规\n📝 违规内容: 大调查小萝莉\n⚠️ 违规原因: AI识别到性暗示未成年\n⏰ 时间: ${new Date().toLocaleString()}`);
             
             await delay(1000);
         }
@@ -2195,7 +2129,6 @@
             if (e.target === modalOverlay) closeDemo();
         });
         
-        // 阻止模态框内滚轮事件冒泡到主页面
         modalOverlay.addEventListener('wheel', (e) => {
             e.stopPropagation();
         }, { passive: false });
