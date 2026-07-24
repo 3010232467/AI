@@ -345,7 +345,7 @@
         }
         .features-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            grid-template-columns: repeat(2, 1fr);
             gap: clamp(16px, 2vw, 20px);
             max-width: min(1000px, 90vw);
             margin: 0 auto;
@@ -384,13 +384,13 @@
             opacity: 1;
         }
         .feature-icon {
-            width: 52px; height: 52px;
+            width: clamp(44px, 4vw, 52px); height: clamp(44px, 4vw, 52px);
             background: rgba(255,107,157,0.1);
             border-radius: 14px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 22px;
+            font-size: clamp(18px, 2vw, 22px);
             margin-bottom: 16px;
             transition: all 0.4s ease;
         }
@@ -415,7 +415,7 @@
             display: inline-flex;
             align-items: center;
             gap: 6px;
-            padding: 8px 16px;
+            padding: clamp(6px, 0.8vw, 8px) clamp(12px, 1.5vw, 16px);
             background: rgba(255,107,157,0.1);
             border: 1px solid rgba(255,107,157,0.3);
             border-radius: 12px;
@@ -532,7 +532,7 @@
         }
         .preview-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            grid-template-columns: repeat(2, 1fr);
             gap: clamp(16px, 2vw, 20px);
             max-width: min(900px, 90vw);
             margin: 0 auto;
@@ -554,7 +554,7 @@
             box-shadow: 0 20px 40px rgba(255,143,171,0.15);
         }
         .preview-header {
-            padding: 18px;
+            padding: clamp(14px, 1.5vw, 18px);
             background: var(--primary-gradient);
             color: white;
         }
@@ -713,13 +713,13 @@
             background: #e8e8e8;
             border-radius: 12px;
             overflow: hidden;
-            max-width: 420px;
+            max-width: min(420px, 90vw);
             width: 100%;
             margin: 0 auto;
             box-shadow: 0 20px 60px rgba(0,0,0,0.2);
             display: flex;
             flex-direction: column;
-            height: 450px;
+            height: min(450px, 60vh);
         }
         .qq-top-bar {
             background: #f5f5f5;
@@ -1108,16 +1108,20 @@
         }
 
         /* ===== 响应式 ===== */
+        /* 平板及以下 */
         @media (max-width: 768px) {
             :root { --nav-width: 0; }
             .sidebar { display: none; }
             .main-content { margin-left: 0; width: 100%; }
+            .features-grid { grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); }
+            .preview-grid { grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); }
         }
-        /* 特别窄屏幕适配 */
+        /* 手机竖屏 */
         @media (max-width: 480px) {
             .hero-buttons { flex-direction: column; align-items: center; }
             .btn-primary, .btn-secondary { width: 100%; max-width: 260px; justify-content: center; }
             .hero-stats { flex-direction: column; gap: var(--space-md); }
+            .features-grid, .preview-grid { grid-template-columns: 1fr; }
         }
         /* 矮屏幕适配（横屏手机） */
         @media (max-height: 500px) {
@@ -1134,8 +1138,8 @@
             .features-grid { margin-top: 12px !important; }
             .features-grid, .preview-grid { grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); }
         }
-        /* 矮屏+窄屏（手机竖屏） */
-        @media (max-height: 600px) and (max-width: 480px) {
+        /* 窄屏+矮屏（手机竖屏短板屏） */
+        @media (max-height: 700px) and (max-width: 420px) {
             .features-grid, .preview-grid { grid-template-columns: 1fr; }
         }
 
