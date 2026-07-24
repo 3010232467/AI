@@ -1105,9 +1105,87 @@
             .qq-window { max-width: 100%; }
             .workflow-step { flex-direction: column; }
         }
+
+        /* ===== 横屏提示遮罩 ===== */
+        .rotate-overlay {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100vw; height: 100vh;
+            z-index: 9999;
+            background: rgba(0,0,0,0.85);
+            backdrop-filter: blur(12px);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.4s ease;
+        }
+        .rotate-overlay.show {
+            opacity: 1;
+            pointer-events: auto;
+        }
+        .rotate-icon {
+            width: 90px;
+            height: 90px;
+            border: 3px solid #fff;
+            border-radius: 14px;
+            position: relative;
+            animation: rotatePhone 2s ease-in-out infinite;
+            margin-bottom: 32px;
+        }
+        .rotate-icon::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 6px;
+            height: 6px;
+            background: #fff;
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+        }
+        .rotate-icon::after {
+            content: '';
+            position: absolute;
+            top: 6px;
+            left: 50%;
+            width: 20px;
+            height: 3px;
+            background: #fff;
+            border-radius: 2px;
+            transform: translateX(-50%);
+        }
+        @keyframes rotatePhone {
+            0%   { transform: rotate(0deg); }
+            25%  { transform: rotate(-90deg); }
+            75%  { transform: rotate(-90deg); }
+            100% { transform: rotate(-90deg); }
+        }
+        .rotate-text {
+            color: #fff;
+            font-size: 20px;
+            font-weight: 600;
+            text-align: center;
+            line-height: 1.6;
+        }
+        .rotate-sub {
+            color: rgba(255,255,255,0.6);
+            font-size: 14px;
+            margin-top: 10px;
+            text-align: center;
+        }
     </style>
 </head>
 <body>
+    <!-- 横屏提示遮罩 -->
+    <div class="rotate-overlay" id="rotateOverlay">
+        <div class="rotate-icon"></div>
+        <div class="rotate-text">请旋转手机至横屏模式</div>
+        <div class="rotate-sub">横屏后获得更佳浏览体验</div>
+    </div>
+
     <div class="bg-container"></div>
 
     <!-- 左侧导航栏 -->
@@ -1390,6 +1468,23 @@
     </div>
 
     <script>
+        // ===== 移动端横屏检测 =====
+        const overlay = document.getElementById('rotateOverlay');
+        const isMobile = window.innerWidth <= 768;
+
+        function checkOrientation() {
+            if (!isMobile) return;
+            const isPortrait = window.innerHeight > window.innerWidth;
+            overlay.classList.toggle('show', isPortrait);
+        }
+
+        // 监听 orientation change
+        window.addEventListener('resize', checkOrientation);
+        window.addEventListener('orientationchange', () => {
+            setTimeout(checkOrientation, 300);
+        });
+        checkOrientation();
+
         // ===== 页面导航 =====
         const pages = ['hero', 'features', 'workflow', 'webui', 'download'];
         let currentPage = 0;
