@@ -1493,6 +1493,80 @@
             setTimeout(() => { isScrolling = false; }, 700);
         }, { passive: false });
 
+        // ===== 移动端触摸切换 =====
+        let touchStartY = 0;
+        let touchStartX = 0;
+        let touchStartTime = 0;
+        let isTouchTracking = false;
+
+        document.getElementById('main-content').addEventListener('touchstart', (e) => {
+            const touch = e.touches[0];
+            touchStartY = touch.clientY;
+            touchStartX = touch.clientX;
+            touchStartTime = Date.now();
+            isTouchTracking = true;
+        }, { passive: true });
+
+        document.getElementById('main-content').addEventListener('touchmove', (e) => {
+            if (!isTouchTracking) return;
+            
+            const currPage = document.getElementById('page-' + pages[currentPage]);
+            const touch = e.touches[0];
+            const deltaY = touchStartY - touch.clientY;
+            const scrollBottom = currPage.scrollHeight - currPage.clientHeight;
+            
+            // 检测是否到达滚动边界，阻止浏览器弹性滚动
+            if (deltaY < 0 && currPage.scrollTop <= 0) {
+                // 向上拉到顶了，阻止继续下拉
+                e.preventDefault();
+            } else if (deltaY > 0 && currPage.scrollTop >= scrollBottom - 5) {
+                // 向下拉到底了，阻止继续上拉
+                e.preventDefault();
+            }
+        }, { passive: false });
+
+        document.getElementById('main-content').addEventListener('touchend', (e) => {
+            if (!isTouchTracking) return;
+            isTouchTracking = false;
+
+            const touch = e.changedTouches[0];
+            const deltaY = touchStartY - touch.clientY;
+            const deltaX = touchStartX - touch.clientX;
+            const elapsed = Date.now() - touchStartTime;
+
+            // 只处理垂直滑动，忽略水平滑动（大于45度角）
+            if (Math.abs(deltaY) < Math.abs(deltaX)) return;
+
+            const currPage = document.getElementById('page-' + pages[currentPage]);
+            const scrollBottom = currPage.scrollHeight - currPage.clientHeight;
+            const isScrollable = currPage.scrollHeight > currPage.clientHeight;
+
+            // 判断滑动意图：快速短划 或 慢速长划
+            const isFastSwipe = elapsed < 300 && Math.abs(deltaY) > 30;
+            const isSlowSwipe = Math.abs(deltaY) > 80;
+
+            if (!isFastSwipe && !isSlowSwipe) return;
+
+            const delta = deltaY > 0 ? 1 : -1;
+
+            // 如果页面可滚动且在边界内，允许内部滚动
+            if (isScrollable) {
+                if (delta > 0 && currPage.scrollTop < scrollBottom - 10) return;
+                if (delta < 0 && currPage.scrollTop > 10) return;
+            }
+
+            // 到达边界，切换页面
+            if (isScrolling) return;
+            isScrolling = true;
+            const newIndex = currentPage + delta;
+
+            if (newIndex >= 0 && newIndex < pages.length) {
+                goToPage(pages[newIndex]);
+            }
+
+            setTimeout(() => { isScrolling = false; }, 700);
+        }, { passive: true });
+
         // 键盘方向键切换
         document.addEventListener('keydown', (e) => {
             if (e.key === 'ArrowDown' || e.key === 'PageDown') {
