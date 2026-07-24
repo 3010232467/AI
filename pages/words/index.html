@@ -361,8 +361,8 @@
         .debug { font-size: 12px; color: #b080a0; margin-top: 12px; word-break: break-all; z-index: 2; position: relative; }
 
         /* ===== 表格 ===== */
-        .table-wrap { overflow-x: auto; border-radius: 12px; }
-        table { width: 100%; border-collapse: collapse; table-layout: fixed; }
+        .table-wrap { overflow-x: auto; border-radius: 12px; position: relative; z-index: 1; }
+        table { width: 100%; min-width: 800px; border-collapse: collapse; table-layout: fixed; }
         th {
             padding: 12px 10px;
             text-align: left;
@@ -373,7 +373,7 @@
             border-bottom: 2px solid rgba(255,143,171,0.25);
             white-space: nowrap;
         }
-        td { padding: 10px; text-align: left; border-bottom: 1px solid rgba(255,143,171,0.1); font-size: 13px; white-space: nowrap; overflow: hidden; position: relative; cursor: default; }
+        td { padding: 10px; text-align: left; border-bottom: 1px solid rgba(255,143,171,0.1); font-size: 13px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; position: relative; cursor: default; color: #5a3d54; }
         td:hover { z-index: 20; background: rgba(255,210,220,0.7); border-radius: 6px; transition: background 0.2s ease; }
         /* 悬浮提示卡片 */
         #tooltip-card {
@@ -530,13 +530,13 @@
                 <table>
                     <thead>
                         <tr>
-                            <th style="width:120px;">⏰ 时间</th>
-                            <th style="width:70px;">👤 用户</th>
-                            <th style="width:70px;">👥 群号</th>
+                            <th style="width:150px;">⏰ 时间</th>
+                            <th style="width:90px;">👤 用户</th>
+                            <th style="width:90px;">👥 群号</th>
                             <th style="width:80px;">等级</th>
-                            <th style="width:55px;">来源</th>
-                            <th>📝 违规内容</th>
-                            <th>⚠️ 违规原因</th>
+                            <th style="width:60px;">来源</th>
+                            <th style="width:25%;">📝 违规内容</th>
+                            <th style="width:25%;">⚠️ 违规原因</th>
                             <th style="width:60px;">操作</th>
                         </tr>
                     </thead>
@@ -795,7 +795,8 @@
         function escapeHtml(text) {
             const div = document.createElement('div');
             div.textContent = String(text);
-            return div.innerHTML;
+            // 额外转义双引号，因为输出会用于 HTML 属性中
+            return div.innerHTML.replace(/"/g, '&quot;');
         }
 
         function formatTime(ts) {
@@ -874,9 +875,13 @@
 
         // ========== 违规记录 ==========
         async function loadViolations() {
-            if (!ready) return;
+            if (!ready) {
+                debug('Bridge 未就绪，无法加载违规记录');
+                return;
+            }
             try {
                 let data = await bridge.apiGet("violations");
+                debug('违规记录API响应: ' + JSON.stringify(data));
                 const details = (data && data.details) ? data.details : [];
                 const counts = (data && data.counts) ? data.counts : {};
 
@@ -903,6 +908,7 @@
                     const levelText = d.level === 'block' ? '🔴 严重' : '🟡 轻度';
                     const sourceClass = d.source === 'keyword' ? 'source-keyword' : 'source-ai';
                     const sourceText = d.source === 'keyword' ? '关键词' : 'AI';
+                    const userId = escapeHtml(d.user_id || '');
                     return '<tr>' +
                         '<td data-fulltext="' + escapeHtml(formatTime(d.timestamp)) + '">' + escapeHtml(formatTime(d.timestamp)) + '</td>' +
                         '<td data-fulltext="' + escapeHtml(d.user_id || '-') + '">' + escapeHtml(d.user_id || '-') + '</td>' +
@@ -911,9 +917,15 @@
                         '<td data-fulltext="' + escapeHtml(sourceText) + '"><span class="source-tag ' + sourceClass + '">' + sourceText + '</span></td>' +
                         '<td data-fulltext="' + escapeHtml(d.content || '-') + '">' + escapeHtml(d.content || '-') + '</td>' +
                         '<td data-fulltext="' + escapeHtml(d.reason || '-') + '">' + escapeHtml(d.reason || '-') + '</td>' +
-                        '<td><button class="btn btn-danger" style="padding:4px 10px;font-size:12px" onclick="clearUserViolations(\'' + escapeHtml(d.user_id) + '\')">清空</button></td>' +
+                        '<td><button class="btn btn-danger" style="padding:4px 10px;font-size:12px" data-user-id="' + userId + '">清空</button></td>' +
                         '</tr>';
                 }).join('');
+                // 添加事件监听器
+                tbody.querySelectorAll('button[data-user-id]').forEach(btn => {
+                    btn.addEventListener('click', function() {
+                        clearUserViolations(this.getAttribute('data-user-id'));
+                    });
+                });
             } catch(e) {
                 showToast('加载违规记录失败: ' + (e.message || e), 'error');
             }

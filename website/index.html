@@ -1,0 +1,2204 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>文本审核插件 - AstrBot 智能审核解决方案</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        /* ===== 基础样式 ===== */
+        :root {
+            --primary-gradient: linear-gradient(135deg, #ff6b9d 0%, #ff8fab 50%, #ffc2d1 100%);
+            --secondary-gradient: linear-gradient(135deg, #b39ddb 0%, #ce93d8 50%, #e1bee7 100%);
+            --accent-color: #ff6b9d;
+            --bg-light: #fff5f7;
+            --bg-card: rgba(255,255,255,0.7);
+            --text-primary: #5a3d54;
+            --text-secondary: #9a7a90;
+            --text-muted: #c4a0b4;
+            --border-color: rgba(255,143,171,0.2);
+        }
+
+        body {
+            font-family: "Segoe UI", "PingFang SC", "Microsoft YaHei", -apple-system, sans-serif;
+            background: var(--bg-light);
+            color: var(--text-primary);
+            min-height: 100vh;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        /* ===== 背景 ===== */
+        .bg-container {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            z-index: 0;
+            background: linear-gradient(135deg, #ffe0ec 0%, #f3e5f5 50%, #e8eaf6 100%);
+            background-size: 400% 400%;
+            animation: flowBg 16s ease infinite;
+        }
+        @keyframes flowBg {
+            0%   { background-position: 0% 50%; }
+            25%  { background-position: 100% 0%; }
+            50%  { background-position: 100% 100%; }
+            75%  { background-position: 0% 100%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        /* ===== 导航栏 ===== */
+        nav {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%;
+            z-index: 100;
+            backdrop-filter: blur(20px);
+            background: rgba(255,255,255,0.7);
+            border-bottom: 1px solid var(--border-color);
+            transition: all 0.3s ease;
+        }
+        nav.scrolled {
+            background: rgba(255,255,255,0.95);
+            box-shadow: 0 4px 30px rgba(255,143,171,0.15);
+        }
+        .nav-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 16px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .logo {
+            font-size: 22px;
+            font-weight: 700;
+            background: var(--primary-gradient);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .logo-icon {
+            width: 32px; height: 32px;
+            background: url('logo.png') center/contain no-repeat;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            box-shadow: 0 0 20px rgba(255,107,157,0.4);
+        }
+        .nav-links {
+            display: flex;
+            gap: 24px;
+        }
+        .nav-links a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+        .nav-links a:hover {
+            color: var(--accent-color);
+        }
+        .nav-links a::after {
+            content: '';
+            position: absolute;
+            bottom: -4px; left: 0;
+            width: 0; height: 2px;
+            background: var(--primary-gradient);
+            transition: width 0.3s ease;
+        }
+        .nav-links a:hover::after {
+            width: 100%;
+        }
+        .nav-btn {
+            background: var(--primary-gradient);
+            color: white;
+            padding: 8px 20px;
+            border-radius: 20px;
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(255,107,157,0.3);
+        }
+        .nav-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 25px rgba(255,107,157,0.5);
+        }
+
+        /* ===== 主内容区 ===== */
+        main { position: relative; z-index: 1; }
+
+        /* ===== Hero 区域 ===== */
+        .hero {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 80px 20px 40px;
+            text-align: center;
+        }
+        .hero-content {
+            max-width: 800px;
+        }
+        .hero-tagline {
+            display: inline-block;
+            background: rgba(255,107,157,0.1);
+            border: 1px solid rgba(255,107,157,0.2);
+            border-radius: 20px;
+            padding: 6px 16px;
+            font-size: 13px;
+            color: #ff6b9d;
+            margin-bottom: 20px;
+            animation: fadeInUp 0.6s ease;
+        }
+        .hero-title {
+            font-size: 48px;
+            font-weight: 800;
+            line-height: 1.2;
+            margin-bottom: 20px;
+            animation: fadeInUp 0.6s ease 0.1s both;
+            color: #5a3d54;
+        }
+        .hero-title span {
+            background: var(--primary-gradient);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .hero-desc {
+            font-size: 18px;
+            color: var(--text-secondary);
+            line-height: 1.7;
+            margin-bottom: 40px;
+            animation: fadeInUp 0.6s ease 0.2s both;
+        }
+        .hero-buttons {
+            display: flex;
+            gap: 16px;
+            justify-content: center;
+            flex-wrap: wrap;
+            animation: fadeInUp 0.6s ease 0.3s both;
+        }
+        .btn-primary {
+            background: var(--primary-gradient);
+            color: white;
+            padding: 14px 32px;
+            border-radius: 30px;
+            text-decoration: none;
+            font-size: 16px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 20px rgba(255,107,157,0.4);
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .btn-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 30px rgba(255,107,157,0.6);
+        }
+        .btn-secondary {
+            background: rgba(255,255,255,0.6);
+            color: #5a3d54;
+            padding: 14px 32px;
+            border-radius: 30px;
+            text-decoration: none;
+            font-size: 16px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            border: 1px solid rgba(255,143,171,0.3);
+            backdrop-filter: blur(10px);
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .btn-secondary:hover {
+            background: rgba(255,255,255,0.8);
+            border-color: rgba(255,107,157,0.4);
+        }
+        .hero-stats {
+            display: flex;
+            justify-content: center;
+            gap: 60px;
+            margin-top: 80px;
+            animation: fadeInUp 0.6s ease 0.4s both;
+        }
+        .stat-item {
+            text-align: center;
+        }
+        .stat-num {
+            font-size: 36px;
+            font-weight: 800;
+            background: var(--primary-gradient);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .stat-label {
+            font-size: 14px;
+            color: var(--text-muted);
+            margin-top: 4px;
+        }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        /* ===== 功能特性区域 ===== */
+        .features {
+            padding: 100px 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .section-header {
+            text-align: center;
+            margin-bottom: 60px;
+        }
+        .section-subtitle {
+            font-size: 13px;
+            color: #ff6b9d;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 12px;
+        }
+        .section-title {
+            font-size: 36px;
+            font-weight: 700;
+            margin-bottom: 16px;
+            color: #5a3d54;
+        }
+        .section-desc {
+            font-size: 16px;
+            color: var(--text-secondary);
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 24px;
+        }
+        .feature-card {
+            background: rgba(255,255,255,0.7);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255,143,171,0.2);
+            border-radius: 20px;
+            padding: 32px;
+            transition: all 0.4s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        .feature-card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 3px;
+            background: var(--primary-gradient);
+            opacity: 0;
+            transition: opacity 0.4s ease;
+        }
+        .feature-card:hover {
+            transform: translateY(-8px);
+            border-color: rgba(255,107,157,0.4);
+            box-shadow: 
+                0 0 0 1px rgba(255,107,157,0.2),
+                0 20px 40px rgba(255,143,171,0.15),
+                0 0 40px rgba(255,107,157,0.1);
+        }
+        .feature-card:hover::before {
+            opacity: 1;
+        }
+        .feature-icon {
+            width: 56px; height: 56px;
+            background: rgba(255,107,157,0.1);
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            margin-bottom: 20px;
+            transition: all 0.4s ease;
+        }
+        .feature-card:hover .feature-icon {
+            background: var(--primary-gradient);
+            box-shadow: 0 0 25px rgba(255,107,157,0.4);
+            transform: scale(1.1);
+        }
+        .feature-title {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 12px;
+            color: #5a3d54;
+        }
+        .feature-desc {
+            font-size: 14px;
+            color: var(--text-secondary);
+            line-height: 1.7;
+            margin-bottom: 20px;
+        }
+        .demo-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 16px;
+            background: rgba(255,107,157,0.1);
+            border: 1px solid rgba(255,107,157,0.3);
+            border-radius: 12px;
+            color: #ff6b9d;
+            font-size: 13px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .demo-btn:hover {
+            background: rgba(255,107,157,0.15);
+            border-color: rgba(255,107,157,0.5);
+            transform: translateY(-2px);
+        }
+        .feature-card.dev {
+            opacity: 0.6;
+            background: rgba(255,255,255,0.4);
+            border-style: dashed;
+            cursor: not-allowed;
+        }
+        .feature-card.dev:hover {
+            transform: none;
+            box-shadow: none;
+            border-color: var(--border-color);
+        }
+        .feature-card.dev .feature-icon {
+            background: rgba(255,143,171,0.1);
+        }
+        .feature-card.dev:hover .feature-icon {
+            background: rgba(255,143,171,0.1);
+            transform: none;
+            box-shadow: none;
+        }
+
+        /* ===== 工作原理区域 ===== */
+        .workflow {
+            padding: 100px 20px;
+            background: linear-gradient(180deg, transparent 0%, rgba(255,143,171,0.05) 100%);
+        }
+        .workflow-container {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+        .workflow-steps {
+            display: flex;
+            flex-direction: column;
+            gap: 32px;
+        }
+        .workflow-step {
+            display: flex;
+            align-items: flex-start;
+            gap: 24px;
+            background: rgba(255,255,255,0.7);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255,143,171,0.2);
+            border-radius: 20px;
+            padding: 28px;
+            transition: all 0.3s ease;
+        }
+        .workflow-step:hover {
+            border-color: rgba(255,107,157,0.4);
+            transform: translateX(8px);
+        }
+        .step-number {
+            width: 48px; height: 48px;
+            background: var(--primary-gradient);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            font-weight: 700;
+            flex-shrink: 0;
+            box-shadow: 0 4px 15px rgba(255,107,157,0.4);
+        }
+        .step-content h3 {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #5a3d54;
+        }
+        .step-content p {
+            font-size: 14px;
+            color: var(--text-secondary);
+            line-height: 1.6;
+        }
+
+        /* ===== WebUI 预览区域 ===== */
+        .webui-preview {
+            padding: 100px 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .preview-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 24px;
+            margin-top: 40px;
+        }
+        .preview-card {
+            background: rgba(255,255,255,0.7);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255,143,171,0.2);
+            border-radius: 20px;
+            overflow: hidden;
+            transition: all 0.4s ease;
+        }
+        .preview-card:hover {
+            transform: translateY(-8px);
+            border-color: rgba(255,107,157,0.4);
+            box-shadow: 0 20px 40px rgba(255,143,171,0.15);
+        }
+        .preview-header {
+            padding: 20px;
+            background: var(--primary-gradient);
+            color: white;
+        }
+        .preview-icon {
+            font-size: 24px;
+            margin-bottom: 8px;
+        }
+        .preview-title {
+            font-size: 16px;
+            font-weight: 600;
+        }
+        .preview-body {
+            padding: 20px;
+        }
+        .preview-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 0;
+            border-bottom: 1px solid rgba(255,143,171,0.15);
+            font-size: 14px;
+            color: var(--text-secondary);
+        }
+        .preview-item:last-child {
+            border-bottom: none;
+        }
+        .preview-item .check {
+            width: 16px; height: 16px;
+            background: rgba(102,187,106,0.15);
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #66bb6a;
+            font-size: 10px;
+        }
+
+        /* ===== 下载区域 ===== */
+        .download {
+            padding: 100px 20px;
+            text-align: center;
+            background: linear-gradient(135deg, rgba(255,143,171,0.05) 0%, rgba(179,157,219,0.05) 50%, rgba(255,184,195,0.05) 100%);
+        }
+        .download-container {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        .download-badge {
+            display: inline-block;
+            background: rgba(255,107,157,0.1);
+            border: 1px solid rgba(255,107,157,0.2);
+            border-radius: 20px;
+            padding: 8px 20px;
+            font-size: 14px;
+            color: #ff6b9d;
+            margin-bottom: 20px;
+        }
+        .download-title {
+            font-size: 32px;
+            font-weight: 700;
+            margin-bottom: 16px;
+            color: #5a3d54;
+        }
+        .download-desc {
+            font-size: 16px;
+            color: var(--text-secondary);
+            margin-bottom: 40px;
+        }
+        .download-stats {
+            display: flex;
+            justify-content: center;
+            gap: 40px;
+            margin-bottom: 40px;
+            font-size: 14px;
+            color: var(--text-muted);
+        }
+
+        /* ===== 页脚 ===== */
+        footer {
+            padding: 40px 20px;
+            border-top: 1px solid rgba(255,143,171,0.2);
+            text-align: center;
+            background: rgba(255,255,255,0.3);
+        }
+        .footer-content {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        .footer-logo {
+            font-size: 20px;
+            font-weight: 700;
+            background: var(--primary-gradient);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 16px;
+        }
+        .footer-links {
+            display: flex;
+            justify-content: center;
+            gap: 24px;
+            margin-bottom: 24px;
+        }
+        .footer-links a {
+            color: var(--text-muted);
+            text-decoration: none;
+            font-size: 14px;
+            transition: color 0.3s ease;
+        }
+        .footer-links a:hover {
+            color: #ff6b9d;
+        }
+        .footer-copyright {
+            font-size: 13px;
+            color: var(--text-muted);
+        }
+        .footer-author {
+            font-size: 12px;
+            color: var(--text-muted);
+            margin-top: 8px;
+        }
+
+        /* ===== 演示模态框 ===== */
+        .modal-overlay {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: rgba(90,61,84,0.7);
+            backdrop-filter: blur(10px);
+            z-index: 200;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        .modal-overlay.show {
+            opacity: 1;
+            visibility: visible;
+        }
+        .modal {
+            background: rgba(255,255,255,0.98);
+            border: 1px solid rgba(255,143,171,0.3);
+            border-radius: 24px;
+            width: 100%;
+            max-width: 900px;
+            max-height: 90vh;
+            overflow: hidden;
+            transform: scale(0.9);
+            transition: transform 0.3s ease;
+            box-shadow: 0 20px 60px rgba(255,143,171,0.2);
+        }
+        .modal-overlay.show .modal {
+            transform: scale(1);
+        }
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 24px;
+            border-bottom: 1px solid rgba(255,143,171,0.2);
+            background: rgba(255,143,171,0.05);
+        }
+        .modal-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #5a3d54;
+        }
+        .modal-close {
+            width: 32px; height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(255,143,171,0.1);
+            border: none;
+            border-radius: 8px;
+            color: #9a7a90;
+            cursor: pointer;
+            font-size: 18px;
+            transition: all 0.3s ease;
+        }
+        .modal-close:hover {
+            background: rgba(255,107,157,0.2);
+            color: #ff6b9d;
+        }
+        .modal-body {
+            padding: 24px;
+            overflow: auto;
+            max-height: calc(90vh - 100px);
+        }
+        .modal-overlay.show {
+            overflow: hidden;
+        }
+        .modal-overlay.show ~ main,
+        .modal-overlay.show ~ footer {
+            overflow: hidden;
+            position: fixed;
+            width: 100%;
+        }
+
+        /* ===== QQ 聊天界面演示（仿真实 QQ 风格）===== */
+        .qq-window {
+            background: #e8e8e8;
+            border-radius: 12px;
+            overflow: hidden;
+            max-width: 420px;
+            width: 100%;
+            margin: 0 auto;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+            display: flex;
+            flex-direction: column;
+            height: 450px;
+        }
+        .qq-top-bar {
+            background: #f5f5f5;
+            height: 42px;
+            display: flex;
+            align-items: center;
+            padding: 0 12px;
+            border-bottom: 1px solid #d9d9d9;
+            position: relative;
+        }
+        .qq-top-bar::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, #999, transparent);
+        }
+        .qq-avatar-mini {
+            width: 30px; height: 30px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #ff6b9d, #ff8fab);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            margin-right: 10px;
+        }
+        .qq-group-name {
+            flex: 1;
+            font-size: 14px;
+            font-weight: 600;
+            color: #333;
+        }
+        .qq-status {
+            font-size: 11px;
+            color: #888;
+        }
+        .qq-status.online { color: #52c41a; }
+        
+        .qq-chat-area {
+            background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23d9d9d9' fill-opacity='0.4'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+            padding: 12px;
+            flex: 1;
+            overflow-y: auto;
+            overflow-x: hidden;
+        }
+
+        .qq-msg {
+            display: flex;
+            margin-bottom: 16px;
+            animation: msgSlideIn 0.3s ease;
+        }
+        @keyframes msgSlideIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .qq-msg.others { flex-direction: row; }
+        .qq-msg.me { flex-direction: row-reverse; }
+
+        .qq-avatar {
+            width: 40px; height: 40px;
+            border-radius: 50%;
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+        }
+        .qq-msg.others .qq-avatar {
+            background: linear-gradient(135deg, #ff6b9d, #ff8fab);
+            margin-right: 10px;
+        }
+        .qq-msg.me .qq-avatar {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            margin-left: 10px;
+        }
+        .qq-msg.bot .qq-avatar {
+            background: linear-gradient(135deg, #ffa726, #ff8f00);
+            margin-right: 10px;
+        }
+
+        .qq-msg-content {
+            max-width: 75%;
+        }
+        .qq-msg-name {
+            font-size: 12px;
+            color: #666;
+            margin-bottom: 4px;
+        }
+        .qq-msg.me .qq-msg-name { text-align: right; }
+
+        .qq-bubble {
+            padding: 10px 14px;
+            border-radius: 10px;
+            font-size: 14px;
+            line-height: 1.5;
+            position: relative;
+            word-break: break-all;
+        }
+        .qq-msg.others .qq-bubble {
+            background: #fff;
+            color: #333;
+            border-radius: 0 10px 10px 10px;
+        }
+        .qq-msg.others .qq-bubble::before {
+            content: '';
+            position: absolute;
+            left: -6px; top: 12px;
+            width: 0; height: 0;
+            border-top: 6px solid transparent;
+            border-bottom: 6px solid transparent;
+            border-right: 6px solid #fff;
+        }
+        .qq-msg.me .qq-bubble {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: #fff;
+            border-radius: 10px 0 10px 10px;
+        }
+        .qq-msg.me .qq-bubble::before {
+            content: '';
+            position: absolute;
+            right: -6px; top: 12px;
+            width: 0; height: 0;
+            border-top: 6px solid transparent;
+            border-bottom: 6px solid transparent;
+            border-left: 6px solid #667eea;
+        }
+        .qq-msg.bot .qq-bubble {
+            background: #fff;
+            color: #333;
+            border-radius: 0 10px 10px 10px;
+            border: 1px solid #ffb74d;
+        }
+        .qq-msg.bot .qq-bubble::before {
+            content: '';
+            position: absolute;
+            left: -6px; top: 12px;
+            width: 0; height: 0;
+            border-top: 6px solid transparent;
+            border-bottom: 6px solid transparent;
+            border-right: 6px solid #fff;
+        }
+
+        .qq-msg.blocked .qq-bubble {
+            opacity: 0.5;
+            text-decoration: line-through;
+            background: #ffebee !important;
+            color: #c62828 !important;
+        }
+        .qq-msg.blocked .qq-bubble::before {
+            border-right-color: #ffebee !important;
+            border-left-color: #ffebee !important;
+        }
+
+        .qq-system-msg {
+            text-align: center;
+            padding: 8px 16px;
+            margin: 12px 0;
+            font-size: 12px;
+            color: #999;
+            animation: fadeIn 0.3s ease;
+        }
+        .qq-system-msg.warning { color: #f57c00; }
+        .qq-system-msg.error { color: #d32f2f; }
+        .qq-system-msg.success { color: #43a047; }
+
+        .qq-input-bar {
+            background: #f5f5f5;
+            padding: 10px 12px;
+            border-top: 1px solid #d9d9d9;
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+        .qq-input {
+            flex: 1;
+            padding: 8px 14px;
+            border: 1px solid #d9d9d9;
+            border-radius: 20px;
+            font-size: 14px;
+            background: #fff;
+            outline: none;
+            transition: all 0.2s;
+        }
+        .qq-input:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 0 2px rgba(102,126,234,0.2);
+        }
+        .qq-send-btn {
+            padding: 8px 20px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .qq-send-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 2px 10px rgba(102,126,234,0.4);
+        }
+        .qq-send-btn:active {
+            transform: scale(0.95);
+        }
+
+        /* ===== AstrBot 插件风格演示 ===== */
+        .astrbot-ui {
+            background: linear-gradient(135deg, #ffe0ec, #f3e5f5, #e8eaf6);
+            background-size: 400% 400%;
+            border-radius: 18px;
+            padding: 20px;
+            max-width: 600px;
+            width: 100%;
+            margin: 0 auto;
+            animation: flowBg 16s ease infinite;
+            display: flex;
+            flex-direction: column;
+            height: 450px;
+        }
+        @keyframes flowBg {
+            0% { background-position: 0% 50%; }
+            25% { background-position: 100% 0%; }
+            50% { background-position: 100% 100%; }
+            75% { background-position: 0% 100%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        .astrbot-tabs {
+            display: flex;
+            gap: 6px;
+            margin-bottom: 20px;
+            background: rgba(255,255,255,0.5);
+            backdrop-filter: blur(10px);
+            padding: 6px;
+            border-radius: 16px;
+            border: 1px solid rgba(255,255,255,0.6);
+        }
+        .astrbot-tab {
+            flex: 1;
+            padding: 10px 16px;
+            cursor: pointer;
+            border: none;
+            background: transparent;
+            font-size: 14px;
+            font-weight: 600;
+            color: #9a7a90;
+            border-radius: 12px;
+            transition: all 0.3s;
+        }
+        .astrbot-tab.active {
+            color: white;
+            background: linear-gradient(135deg, #ff8fab, #b39ddb);
+        }
+
+        .astrbot-panel {
+            background: rgba(255,255,255,0.55);
+            backdrop-filter: blur(14px);
+            border: 1px solid rgba(255,255,255,0.7);
+            border-radius: 18px;
+            padding: 20px;
+            flex: 1;
+            overflow-y: auto;
+            margin-bottom: 16px;
+        }
+
+        .astrbot-word-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            max-height: 150px;
+            overflow-y: auto;
+        }
+        .astrbot-word-tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            background: linear-gradient(135deg, rgba(255,255,255,0.85), rgba(255,228,238,0.7));
+            border: 1px solid rgba(255,143,171,0.3);
+            border-radius: 16px;
+            padding: 5px 8px 5px 12px;
+            font-size: 13px;
+            color: #5a3d54;
+        }
+        .astrbot-word-tag.new {
+            animation: highlight 1s ease;
+            background: linear-gradient(135deg, rgba(255,235,59,0.8), rgba(255,255,255,0.8));
+            border-color: rgba(255,193,7,0.6);
+        }
+        @keyframes highlight {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(255,193,7,0); }
+            50% { box-shadow: 0 0 0 4px rgba(255,193,7,0.3); }
+        }
+
+        /* ===== 演示控制 ===== */
+        .demo-controls {
+            margin-top: 20px;
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        .demo-btn-control {
+            padding: 10px 20px;
+            background: rgba(168,85,247,0.2);
+            border: 1px solid rgba(168,85,247,0.4);
+            border-radius: 12px;
+            color: white;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .demo-btn-control:hover {
+            background: rgba(168,85,247,0.3);
+            border-color: rgba(168,85,247,0.6);
+        }
+        .demo-btn-control:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        .demo-status {
+            text-align: center;
+            margin-top: 16px;
+            font-size: 13px;
+            color: var(--text-muted);
+        }
+
+        /* ===== 双页面切换容器 ===== */
+        .demo-pages {
+            position: relative;
+            width: 100%;
+            height: 500px;
+            overflow: hidden;
+            border-radius: 18px;
+        }
+        .demo-page {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.5s ease;
+            opacity: 0;
+            transform: translateX(100%);
+        }
+        .demo-page.active {
+            opacity: 1;
+            transform: translateX(0);
+        }
+        .demo-page.prev {
+            opacity: 1;
+            transform: translateX(-100%);
+        }
+        .page-indicator {
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+            margin-top: 16px;
+        }
+        .page-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: rgba(255,143,171,0.3);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .page-dot.active {
+            background: linear-gradient(135deg, #ff6b9d, #b39ddb);
+            width: 24px;
+            border-radius: 5px;
+        }
+        .page-switch-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 16px;
+            background: rgba(255,107,157,0.1);
+            border: 1px solid rgba(255,107,157,0.3);
+            border-radius: 12px;
+            color: #ff6b9d;
+            font-size: 13px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 12px;
+        }
+        .page-switch-btn:hover {
+            background: rgba(255,107,157,0.15);
+            border-color: rgba(255,107,157,0.5);
+        }
+
+        /* ===== 响应式 ===== */
+        @media (max-width: 768px) {
+            .hero-title { font-size: 32px; }
+            .hero-desc { font-size: 16px; }
+            .hero-stats { gap: 30px; }
+            .stat-num { font-size: 28px; }
+            .section-title { font-size: 28px; }
+            .nav-links { display: none; }
+            .workflow-step { flex-direction: column; }
+            .features-grid, .preview-grid { grid-template-columns: 1fr; }
+            .qq-window { max-width: 100%; }
+        }
+    </style>
+</head>
+<body>
+    <div class="bg-container"></div>
+
+    <nav id="navbar">
+        <div class="nav-container">
+            <a href="#" class="logo">
+                <div class="logo-icon"></div>
+                文本审核插件
+            </a>
+            <div class="nav-links">
+                <a href="#features">功能特性</a>
+                <a href="#workflow">工作原理</a>
+                <a href="#webui">WebUI</a>
+                <a href="#download">下载</a>
+            </div>
+            <a href="https://github.com/3010232467/AI" class="nav-btn">GitHub</a>
+        </div>
+    </nav>
+
+    <main>
+        <!-- Hero -->
+        <section class="hero">
+            <div class="hero-content">
+                <div class="hero-tagline">AstrBot 插件 · v1.3.0</div>
+                <h1 class="hero-title">
+                    智能文本审核<br><span>守护群聊环境</span>
+                </h1>
+                <p class="hero-desc">
+                    基于关键词检测与 AI 语义分析的双重审核系统，智能识别隐晦表达、阴阳怪气，实现分级管控与自动惩罚。让你的群聊环境更加安全、和谐。
+                </p>
+                <div class="hero-buttons">
+                    <a href="https://github.com/3010232467/AI/releases/tag/v1.3.0" class="btn-primary">
+                        📥 下载安装
+                    </a>
+                    <a href="#features" class="btn-secondary">
+                        了解更多
+                    </a>
+                </div>
+                <div class="hero-stats">
+                    <div class="stat-item">
+                        <div class="stat-num">5+</div>
+                        <div class="stat-label">检测类型</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-num">60天</div>
+                        <div class="stat-label">数据统计</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-num">10+</div>
+                        <div class="stat-label">支持平台</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Features -->
+        <section id="features" class="features">
+            <div class="section-header">
+                <div class="section-subtitle">Features</div>
+                <h2 class="section-title">强大的功能特性</h2>
+                <p class="section-desc">多重审核机制，智能识别各种违规内容，让群聊管理更轻松</p>
+            </div>
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">🔍</div>
+                    <h3 class="feature-title">双重检测机制</h3>
+                    <p class="feature-desc">关键词检测快速匹配已知违禁词（毫秒级响应），AI 语义分析深度语境判断，识别谐音、拆字、拼音等隐晦表达。</p>
+                    <button class="demo-btn" onclick="openDemo('dual-detection')">🎬 查看演示</button>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">📊</div>
+                    <h3 class="feature-title">分级管控</h3>
+                    <p class="feature-desc">严重违规（BLOCK）撤回+禁言/踢人，轻度违规（WARNING）仅警告不影响计数，安全消息（SAFE）不干预。</p>
+                    <button class="demo-btn" onclick="openDemo('grading')">🎬 查看演示</button>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🧠</div>
+                    <h3 class="feature-title">AI 自动学习</h3>
+                    <p class="feature-desc">AI 审核发现违规时自动提取关键词加入词库，词库持续积累，拦截速度越来越快，节省 API 费用。</p>
+                    <button class="demo-btn" onclick="openDemo('ai-learning')">🎬 查看演示</button>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🎭</div>
+                    <h3 class="feature-title">阴阳怪气识别</h3>
+                    <p class="feature-desc">智能区分「对事」（正常吐槽）和「对人」（人身攻击），对事不对人放过，对人不对事警告撤回。</p>
+                    <button class="demo-btn" onclick="openDemo('sarcasm')">🎬 查看演示</button>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">💾</div>
+                    <h3 class="feature-title">违规记录</h3>
+                    <p class="feature-desc">违规记录保存到本地文件，重启不丢失。记录包含用户ID、群号、内容、原因、等级、时间、来源。</p>
+                    <button class="demo-btn" onclick="openDemo('records')">🎬 查看演示</button>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🌐</div>
+                    <h3 class="feature-title">WebUI 管理</h3>
+                    <p class="feature-desc">四标签页管理界面：违禁词管理、违规记录、管理员设置、API 消耗统计，操作简单直观。</p>
+                    <button class="demo-btn" onclick="openDemo('webui')">🎬 查看演示</button>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">👮</div>
+                    <h3 class="feature-title">管理员权限</h3>
+                    <p class="feature-desc">可设置管理员列表，清空违规记录、移出黑名单等命令需要管理员权限，确保操作安全。</p>
+                    <button class="demo-btn" onclick="openDemo('admin')">🎬 查看演示</button>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">📈</div>
+                    <h3 class="feature-title">Token 计量</h3>
+                    <p class="feature-desc">自动统计 AI 调用量和 Token 消耗，支持多模型价格换算，每日/每月历史数据查看。</p>
+                    <button class="demo-btn" onclick="openDemo('token')">🎬 查看演示</button>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">📨</div>
+                    <h3 class="feature-title">私信通知</h3>
+                    <p class="feature-desc">发现违规时自动私信通知所有管理员，包含详细违规信息，及时掌握群聊动态。</p>
+                    <button class="demo-btn" onclick="openDemo('notify')">🎬 查看演示</button>
+                </div>
+                <div class="feature-card dev">
+                    <div class="feature-icon">🚧</div>
+                    <h3 class="feature-title">更多功能</h3>
+                    <p class="feature-desc">开发中，敬请期待...</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Workflow -->
+        <section id="workflow" class="workflow">
+            <div class="workflow-container">
+                <div class="section-header">
+                    <div class="section-subtitle">Workflow</div>
+                    <h2 class="section-title">审核工作流程</h2>
+                    <p class="section-desc">每一条消息都经过严格的多重检测，确保群聊环境的安全与和谐</p>
+                </div>
+                <div class="workflow-steps">
+                    <div class="workflow-step">
+                        <div class="step-number">1</div>
+                        <div class="step-content">
+                            <h3>消息接收</h3>
+                            <p>插件监听群聊消息，接收每一条新消息并进行预处理。</p>
+                        </div>
+                    </div>
+                    <div class="workflow-step">
+                        <div class="step-number">2</div>
+                        <div class="step-content">
+                            <h3>关键词检测</h3>
+                            <p>快速匹配词库中的违禁词，毫秒级响应，已知违规词直接拦截。</p>
+                        </div>
+                    </div>
+                    <div class="workflow-step">
+                        <div class="step-number">3</div>
+                        <div class="step-content">
+                            <h3>AI 语义分析</h3>
+                            <p>通过 AI 模型进行深度语境判断，识别隐晦表达、阴阳怪气等绕过手段。</p>
+                        </div>
+                    </div>
+                    <div class="workflow-step">
+                        <div class="step-number">4</div>
+                        <div class="step-content">
+                            <h3>分级判定</h3>
+                            <p>根据违规程度判定为 BLOCK（严重）、WARNING（轻度）或 SAFE（安全）。</p>
+                        </div>
+                    </div>
+                    <div class="workflow-step">
+                        <div class="step-number">5</div>
+                        <div class="step-content">
+                            <h3>执行处理</h3>
+                            <p>撤回消息、警告用户、累计违规次数、触发自动惩罚，并通知管理员。</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- WebUI Preview -->
+        <section id="webui" class="webui-preview">
+            <div class="section-header">
+                <div class="section-subtitle">WebUI</div>
+                <h2 class="section-title">可视化管理界面</h2>
+                <p class="section-desc">直观的四标签页管理界面，轻松管理违禁词、查看违规记录、设置管理员</p>
+            </div>
+            <div class="preview-grid">
+                <div class="preview-card">
+                    <div class="preview-header">
+                        <div class="preview-icon">📝</div>
+                        <div class="preview-title">违禁词管理</div>
+                    </div>
+                    <div class="preview-body">
+                        <div class="preview-item"><span class="check">✓</span>添加封禁词/警告词</div>
+                        <div class="preview-item"><span class="check">✓</span>一键删除单个词</div>
+                        <div class="preview-item"><span class="check">✓</span>清空所有违禁词</div>
+                        <div class="preview-item"><span class="check">✓</span>白名单词设置</div>
+                    </div>
+                </div>
+                <div class="preview-card">
+                    <div class="preview-header">
+                        <div class="preview-icon">📋</div>
+                        <div class="preview-title">违规记录</div>
+                    </div>
+                    <div class="preview-body">
+                        <div class="preview-item"><span class="check">✓</span>表格展示详情</div>
+                        <div class="preview-item"><span class="check">✓</span>违规等级标识</div>
+                        <div class="preview-item"><span class="check">✓</span>清空单用户记录</div>
+                        <div class="preview-item"><span class="check">✓</span>清空全部记录</div>
+                    </div>
+                </div>
+                <div class="preview-card">
+                    <div class="preview-header">
+                        <div class="preview-icon">👮</div>
+                        <div class="preview-title">管理员设置</div>
+                    </div>
+                    <div class="preview-body">
+                        <div class="preview-item"><span class="check">✓</span>添加管理员QQ</div>
+                        <div class="preview-item"><span class="check">✓</span>删除管理员</div>
+                        <div class="preview-item"><span class="check">✓</span>权限控制</div>
+                        <div class="preview-item"><span class="check">✓</span>私信通知开关</div>
+                    </div>
+                </div>
+                <div class="preview-card">
+                    <div class="preview-header">
+                        <div class="preview-icon">📈</div>
+                        <div class="preview-title">API 消耗统计</div>
+                    </div>
+                    <div class="preview-body">
+                        <div class="preview-item"><span class="check">✓</span>实时 Token 用量</div>
+                        <div class="preview-item"><span class="check">✓</span>多模型价格换算</div>
+                        <div class="preview-item"><span class="check">✓</span>每日/每月统计</div>
+                        <div class="preview-item"><span class="check">✓</span>历史数据查看</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Download -->
+        <section id="download" class="download">
+            <div class="download-container">
+                <div class="download-badge">Latest Release · v1.3.0</div>
+                <h2 class="download-title">立即下载安装</h2>
+                <p class="download-desc">支持 QQ、Telegram、Discord、飞书等多个平台，一键安装即可使用</p>
+                <div class="download-stats">
+                    <span>📦 插件大小：170 KB</span>
+                    <span>✨ 更新日期：2026-07-24</span>
+                    <span>📱 支持平台：10+</span>
+                </div>
+                <div class="hero-buttons">
+                    <a href="https://github.com/3010232467/AI/releases/tag/v1.3.0" class="btn-primary">
+                        📥 下载插件 (ZIP)
+                    </a>
+                    <a href="https://github.com/3010232467/AI" class="btn-secondary">
+                        查看源码
+                    </a>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <div class="footer-content">
+            <div class="footer-logo">文本审核插件</div>
+            <div class="footer-links">
+                <a href="https://github.com/3010232467/AI">GitHub</a>
+                <a href="https://github.com/3010232467/AI/releases">Releases</a>
+                <a href="https://github.com/3010232467/AI/blob/main/CHANGELOG.md">更新日志</a>
+            </div>
+            <div class="footer-copyright">© 2026 AstrBot Text Moderation Plugin</div>
+            <div class="footer-author">👤 吃糖吃没了 · 🤖 AI 辅助开发</div>
+        </div>
+    </footer>
+
+    <!-- 演示模态框 -->
+    <div class="modal-overlay" id="demo-modal">
+        <div class="modal">
+            <div class="modal-header">
+                <div class="modal-title" id="modal-title">功能演示</div>
+                <button class="modal-close" onclick="closeDemo()">×</button>
+            </div>
+            <div class="modal-body" id="modal-body">
+                <!-- 演示内容动态插入 -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 导航栏滚动效果
+        const navbar = document.getElementById('navbar');
+        window.addEventListener('scroll', () => {
+            navbar.classList.toggle('scrolled', window.scrollY > 50);
+        });
+
+        // 平滑滚动
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', e => {
+                e.preventDefault();
+                const target = document.querySelector(anchor.getAttribute('href'));
+                if (target) target.scrollIntoView({ behavior: 'smooth' });
+            });
+        });
+
+        // 演示模态框
+        const modalOverlay = document.getElementById('demo-modal');
+        const modalTitle = document.getElementById('modal-title');
+        const modalBody = document.getElementById('modal-body');
+        let currentDemo = null;
+        let demoInterval = null;
+
+        function openDemo(type) {
+            currentDemo = type;
+            modalTitle.textContent = getDemoTitle(type);
+            modalBody.innerHTML = getDemoContent(type);
+            modalOverlay.classList.add('show');
+            setTimeout(() => {
+                if (type === 'dual-detection') runDualDetectionDemo();
+                if (type === 'ai-learning') runAILearningDemo();
+                if (type === 'grading') runGradingDemo();
+                if (type === 'sarcasm') runSarcasmDemo();
+                if (type === 'records') runRecordsDemo();
+                if (type === 'webui') runWebUIDemo();
+                if (type === 'admin') runAdminDemo();
+                if (type === 'token') runTokenDemo();
+                if (type === 'notify') runNotifyDemo();
+            }, 100);
+        }
+
+        function closeDemo() {
+            modalOverlay.classList.remove('show');
+            currentDemo = null;
+            if (demoInterval) {
+                clearInterval(demoInterval);
+                demoInterval = null;
+            }
+            // 清理滚动状态
+            Object.keys(scrollStates).forEach(id => {
+                delete scrollStates[id];
+            });
+        }
+
+        function getDemoTitle(type) {
+            const titles = {
+                'dual-detection': '双重检测机制演示',
+                'grading': '分级管控演示',
+                'ai-learning': 'AI 自动学习演示',
+                'sarcasm': '阴阳怪气识别演示',
+                'records': '违规记录演示',
+                'webui': 'WebUI 管理演示',
+                'admin': '管理员权限演示',
+                'token': 'Token 计量演示',
+                'notify': '私信通知演示'
+            };
+            return titles[type] || '功能演示';
+        }
+
+        function getDemoContent(type) {
+            const contents = {
+                'dual-detection': `
+                    <div class="qq-window" id="dual-window">
+                        <div class="qq-top-bar">
+                            <div class="qq-avatar-mini">🌸</div>
+                            <div class="qq-group-name">二次元交流群</div>
+                            <div class="qq-status online">在线 42人</div>
+                        </div>
+                        <div class="qq-chat-area" id="dual-chat"></div>
+                    </div>
+                    <div class="demo-status">自动演示：消息发送 → 审核检测 → 拦截/通过</div>
+                `,
+                'ai-learning': `
+                    <div class="ai-demo" style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                        <div>
+                            <div class="qq-window">
+                                <div class="qq-top-bar">
+                                    <div class="qq-avatar-mini">🤖</div>
+                                    <div class="qq-group-name">AI 学习测试</div>
+                                    <div class="qq-status online">AI 在线</div>
+                                </div>
+                                <div class="qq-chat-area" id="ai-chat"></div>
+                            </div>
+                        </div>
+                        <div class="astrbot-ui">
+                            <div class="astrbot-tabs">
+                                <button class="astrbot-tab active">📝 违禁词管理</button>
+                                <button class="astrbot-tab">🚫 严重违禁词</button>
+                            </div>
+                            <div class="astrbot-panel">
+                                <div style="font-size: 14px; font-weight: 600; color: #5a3d54; margin-bottom: 10px;">🚫 严重违禁词</div>
+                                <div class="astrbot-word-list" id="ai-word-list"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="demo-status">演示 AI 发现新违规词后自动加入词库的过程</div>
+                `,
+                'grading': `
+                    <div class="qq-window" id="grading-window">
+                        <div class="qq-top-bar">
+                            <div class="qq-avatar-mini">📊</div>
+                            <div class="qq-group-name">分级管控测试</div>
+                            <div class="qq-status online">在线</div>
+                        </div>
+                        <div class="qq-chat-area" id="grading-chat"></div>
+                    </div>
+                    <div class="demo-status">演示 SAFE/WARNING/BLOCK 三级处理</div>
+                `,
+                'sarcasm': `
+                    <div class="qq-window" id="sarcasm-window">
+                        <div class="qq-top-bar">
+                            <div class="qq-avatar-mini">🎭</div>
+                            <div class="qq-group-name">阴阳怪气识别</div>
+                            <div class="qq-status online">在线</div>
+                        </div>
+                        <div class="qq-chat-area" id="sarcasm-chat"></div>
+                    </div>
+                    <div class="demo-status">演示对事 vs 对人识别</div>
+                `,
+                'records': `
+                    <div class="demo-pages" id="records-pages">
+                        <!-- 第一页：群聊消息演示 -->
+                        <div class="demo-page active" id="records-page-1">
+                            <div class="qq-window" style="height: 100%; width: 100%; max-width: 500px;">
+                                <div class="qq-top-bar">
+                                    <div class="qq-avatar-mini">🌸</div>
+                                    <div class="qq-group-name">二次元交流群</div>
+                                    <div class="qq-status online">在线 42人</div>
+                                </div>
+                                <div class="qq-chat-area" id="records-chat" style="flex: 1;"></div>
+                                <div class="qq-input-bar">
+                                    <input type="text" class="qq-input" placeholder="输入消息..." readonly>
+                                    <button class="qq-send-btn" onclick="switchRecordsPage(2)" style="opacity: 0.7;">查看违规记录 →</button>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- 第二页：违规记录详情 -->
+                        <div class="demo-page" id="records-page-2">
+                            <div class="astrbot-ui" style="height: 100%; width: 100%; max-width: 700px;">
+                                <div class="astrbot-tabs">
+                                    <button class="astrbot-tab">📝 违禁词</button>
+                                    <button class="astrbot-tab active">📋 违规记录</button>
+                                    <button class="astrbot-tab">👮 管理员</button>
+                                    <button class="astrbot-tab">💰 API消耗</button>
+                                </div>
+                                <div class="astrbot-panel" id="records-panel" style="flex: 1;">
+                                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                                        <div style="font-size: 16px; font-weight: 700; color: #333;">🔍 违规记录详情</div>
+                                        <button style="padding: 6px 14px; background: linear-gradient(135deg, #ff7eb3, #ec407a); color: white; border: none; border-radius: 12px; font-size: 13px; font-weight: 600; cursor: pointer;">🗑️ 清空全部</button>
+                                    </div>
+                                    <div style="border-radius: 12px; background: #ffffff; padding: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); overflow-y: auto; max-height: 320px;">
+                                        <table style="width: 100%; border-collapse: collapse; font-size: 13px; table-layout: auto;">
+                                            <thead>
+                                                <tr style="background: #ffe0ec;">
+                                                    <th style="padding: 10px; text-align: left; color: #333; font-weight: bold; border-bottom: 2px solid #ffb6c1; min-width: 150px;">⏰ 时间</th>
+                                                    <th style="padding: 10px; text-align: left; color: #333; font-weight: bold; border-bottom: 2px solid #ffb6c1; min-width: 80px;">👤 用户</th>
+                                                    <th style="padding: 10px; text-align: left; color: #333; font-weight: bold; border-bottom: 2px solid #ffb6c1; min-width: 80px;">👥 群号</th>
+                                                    <th style="padding: 10px; text-align: left; color: #333; font-weight: bold; border-bottom: 2px solid #ffb6c1; min-width: 80px;">等级</th>
+                                                    <th style="padding: 10px; text-align: left; color: #333; font-weight: bold; border-bottom: 2px solid #ffb6c1; min-width: 60px;">来源</th>
+                                                    <th style="padding: 10px; text-align: left; color: #333; font-weight: bold; border-bottom: 2px solid #ffb6c1;">📝 违规内容</th>
+                                                    <th style="padding: 10px; text-align: left; color: #333; font-weight: bold; border-bottom: 2px solid #ffb6c1;">⚠️ 违规原因</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody id="records-tbody" style="color: #333;">
+                                                <tr><td colspan="7" style="text-align: center; padding: 20px; color: #999;">加载中...</td></tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                                <div style="text-align: center; padding-top: 10px;">
+                                    <button class="page-switch-btn" onclick="switchRecordsPage(1)">← 返回群聊界面</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="page-indicator" id="records-indicator">
+                        <div class="page-dot active" onclick="switchRecordsPage(1)"></div>
+                        <div class="page-dot" onclick="switchRecordsPage(2)"></div>
+                    </div>
+                    <div class="demo-status" id="records-status">群聊违规场景演示，消息发送后自动记录到违规记录</div>
+                `,
+                'webui': `
+                    <div class="astrbot-ui">
+                        <div class="astrbot-tabs">
+                            <button class="astrbot-tab active">📝 违禁词</button>
+                            <button class="astrbot-tab">📋 违规记录</button>
+                            <button class="astrbot-tab">👮 管理员</button>
+                            <button class="astrbot-tab">💰 API消耗</button>
+                        </div>
+                        <div class="astrbot-panel">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                                <div><span style="font-size: 16px; font-weight: 700; color: #5a3d54;">🚫 严重违禁词</span> <span style="padding: 4px 10px; background: rgba(236,64,122,0.15); color: #c2185b; border-radius: 12px; font-size: 12px; font-weight: 600;">色情/涉政/严重侮辱</span></div>
+                                <button style="padding: 6px 14px; background: linear-gradient(135deg, #ffcc80, #ffa726); color: white; border: none; border-radius: 12px; font-size: 13px; font-weight: 600; cursor: pointer;">🧹 清空</button>
+                            </div>
+                            <div style="display: flex; gap: 8px; margin-bottom: 15px;">
+                                <input type="text" style="flex: 1; padding: 10px 14px; border: 1px solid rgba(255,143,171,0.3); border-radius: 12px; font-size: 14px; background: rgba(255,255,255,0.6); color: #5a3d54;" placeholder="输入违禁词">
+                                <button style="padding: 10px 16px; background: linear-gradient(135deg, #ff8fab, #ff6b9d); color: white; border: none; border-radius: 12px; font-size: 14px; font-weight: 600; cursor: pointer;">➕ 添加</button>
+                            </div>
+                            <div class="astrbot-word-list" id="webui-word-list"></div>
+                        </div>
+                        <div class="astrbot-panel">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                                <div><span style="font-size: 16px; font-weight: 700; color: #5a3d54;">⚠️ 轻度违禁词</span> <span style="padding: 4px 10px; background: rgba(255,167,38,0.15); color: #ef6c00; border-radius: 12px; font-size: 12px; font-weight: 600;">轻度侮辱/阴阳怪气</span></div>
+                            </div>
+                            <div style="display: flex; gap: 8px; margin-bottom: 15px;">
+                                <input type="text" style="flex: 1; padding: 10px 14px; border: 1px solid rgba(255,143,171,0.3); border-radius: 12px; font-size: 14px; background: rgba(255,255,255,0.6); color: #5a3d54;" placeholder="输入违禁词">
+                                <button style="padding: 10px 16px; background: linear-gradient(135deg, #ff8fab, #ff6b9d); color: white; border: none; border-radius: 12px; font-size: 14px; font-weight: 600; cursor: pointer;">➕ 添加</button>
+                            </div>
+                            <div class="astrbot-word-list" id="webui-word-list-2"></div>
+                        </div>
+                    </div>
+                    <div class="demo-status">演示 AstrBot 插件 WebUI 管理界面</div>
+                `,
+                'admin': `
+                    <div class="astrbot-ui">
+                        <div class="astrbot-tabs">
+                            <button class="astrbot-tab">📝 违禁词</button>
+                            <button class="astrbot-tab">📋 违规记录</button>
+                            <button class="astrbot-tab active">👮 管理员</button>
+                            <button class="astrbot-tab">💰 API消耗</button>
+                        </div>
+                        <div class="astrbot-panel">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                                <div style="font-size: 16px; font-weight: 700; color: #5a3d54;">👮 管理员列表</div>
+                                <div style="display: flex; gap: 8px;">
+                                    <input type="text" id="admin-input" style="width: 150px; padding: 8px 12px; border: 1px solid rgba(255,143,171,0.3); border-radius: 10px; font-size: 13px; background: rgba(255,255,255,0.6); color: #5a3d54;" placeholder="输入QQ号">
+                                    <button style="padding: 8px 14px; background: linear-gradient(135deg, #ff8fab, #ff6b9d); color: white; border: none; border-radius: 10px; font-size: 13px; font-weight: 600; cursor: pointer;">➕ 添加</button>
+                                </div>
+                            </div>
+                            <div class="astrbot-word-list" id="admin-list"></div>
+                            <div style="margin-top: 20px; padding: 15px; background: rgba(255,228,238,0.5); border-radius: 12px;">
+                                <div style="font-size: 14px; font-weight: 600; color: #5a3d54; margin-bottom: 8px;">⚙️ 管理员权限</div>
+                                <div style="display: flex; flex-wrap: wrap; gap: 8px;">
+                                    <span style="padding: 6px 12px; background: rgba(255,255,255,0.8); border-radius: 20px; font-size: 12px; color: #5a3d54;">清空违规记录</span>
+                                    <span style="padding: 6px 12px; background: rgba(255,255,255,0.8); border-radius: 20px; font-size: 12px; color: #5a3d54;">管理黑名单</span>
+                                    <span style="padding: 6px 12px; background: rgba(255,255,255,0.8); border-radius: 20px; font-size: 12px; color: #5a3d54;">接收违规通知</span>
+                                    <span style="padding: 6px 12px; background: rgba(255,255,255,0.8); border-radius: 20px; font-size: 12px; color: #5a3d54;">配置审核规则</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="demo-status">演示管理员添加、权限控制功能</div>
+                `,
+                'token': `
+                    <div class="astrbot-ui">
+                        <div class="astrbot-tabs">
+                            <button class="astrbot-tab">📝 违禁词</button>
+                            <button class="astrbot-tab">📋 违规记录</button>
+                            <button class="astrbot-tab">👮 管理员</button>
+                            <button class="astrbot-tab active">💰 API消耗</button>
+                        </div>
+                        <div class="astrbot-panel">
+                            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-bottom: 20px;">
+                                <div style="padding: 15px; background: rgba(255,228,238,0.5); border-radius: 12px; text-align: center;">
+                                    <div style="font-size: 24px; font-weight: 700; color: #ec407a;" id="token-calls">0</div>
+                                    <div style="font-size: 12px; color: #9a7a90;">今日 API 调用</div>
+                                </div>
+                                <div style="padding: 15px; background: rgba(255,228,238,0.5); border-radius: 12px; text-align: center;">
+                                    <div style="font-size: 24px; font-weight: 700; color: #7b1fa2;" id="token-prompt">0</div>
+                                    <div style="font-size: 12px; color: #9a7a90;">Prompt Token</div>
+                                </div>
+                                <div style="padding: 15px; background: rgba(255,228,238,0.5); border-radius: 12px; text-align: center;">
+                                    <div style="font-size: 24px; font-weight: 700; color: #ef6c00;" id="token-completion">0</div>
+                                    <div style="font-size: 12px; color: #9a7a90;">Completion Token</div>
+                                </div>
+                            </div>
+                            <div style="padding: 15px; background: rgba(255,255,255,0.6); border-radius: 12px; margin-bottom: 15px;">
+                                <div style="font-size: 14px; font-weight: 600; color: #5a3d54; margin-bottom: 10px;">💰 费用估算 (DeepSeek V3)</div>
+                                <div style="display: flex; justify-content: space-between;">
+                                    <span style="color: #9a7a90;">今日费用</span>
+                                    <span style="font-weight: 700; color: #ec407a;" id="token-cost">$0.00</span>
+                                </div>
+                                <div style="display: flex; justify-content: space-between; margin-top: 5px;">
+                                    <span style="color: #9a7a90;">本月费用</span>
+                                    <span style="font-weight: 700; color: #7b1fa2;" id="token-month-cost">$0.00</span>
+                                </div>
+                            </div>
+                            <div style="padding: 15px; background: rgba(255,255,255,0.6); border-radius: 12px;">
+                                <div style="font-size: 14px; font-weight: 600; color: #5a3d54; margin-bottom: 10px;">📈 今日审核统计</div>
+                                <div style="display: flex; justify-content: space-between;">
+                                    <span style="color: #9a7a90;">审核消息</span>
+                                    <span style="font-weight: 600; color: #5a3d54;" id="token-messages">0</span>
+                                </div>
+                                <div style="display: flex; justify-content: space-between; margin-top: 5px;">
+                                    <span style="color: #9a7a90;">审核字数</span>
+                                    <span style="font-weight: 600; color: #5a3d54;" id="token-chars">0</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="demo-status">演示 Token 消耗实时统计和费用估算</div>
+                `,
+                'notify': `
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                        <div>
+                            <div class="qq-window">
+                                <div class="qq-top-bar">
+                                    <div class="qq-avatar-mini">🌸</div>
+                                    <div class="qq-group-name">二次元交流群</div>
+                                    <div class="qq-status online">在线 42人</div>
+                                </div>
+                                <div class="qq-chat-area" id="notify-group-chat"></div>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="qq-window">
+                                <div class="qq-top-bar">
+                                    <div class="qq-avatar-mini">🤖</div>
+                                    <div class="qq-group-name">文本审核机器人</div>
+                                    <div class="qq-status online">私信</div>
+                                </div>
+                                <div class="qq-chat-area" id="notify-private-chat"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="demo-status">左边群内违规场景，右边机器人私信通知管理员</div>
+                `
+            };
+            return contents[type] || `<div style="text-align:center;padding:40px;">该功能演示开发中...</div>`;
+        }
+
+        // 滚动控制状态 - 简化版：用户滚动后3秒内不自动滚动
+        const scrollStates = {};
+
+        // 页面切换函数
+        let currentRecordsPage = 1;
+        function switchRecordsPage(pageNum) {
+            const page1 = document.getElementById('records-page-1');
+            const page2 = document.getElementById('records-page-2');
+            const dots = document.querySelectorAll('#records-indicator .page-dot');
+            const status = document.getElementById('records-status');
+
+            if (!page1 || !page2) return;
+
+            if (pageNum === 1) {
+                page1.classList.remove('prev');
+                page1.classList.add('active');
+                page2.classList.remove('active');
+                page2.classList.add('prev');
+                dots[0].classList.add('active');
+                dots[1].classList.remove('active');
+                status.textContent = '群聊违规场景演示，消息发送后自动记录到违规记录';
+            } else {
+                page2.classList.remove('prev');
+                page2.classList.add('active');
+                page1.classList.remove('active');
+                page1.classList.add('prev');
+                dots[1].classList.add('active');
+                dots[0].classList.remove('active');
+                status.textContent = '违规记录详情，可查看所有违规历史，支持清空操作';
+            }
+            currentRecordsPage = pageNum;
+        }
+
+        // 延迟函数
+        function delay(ms) {
+            return new Promise(resolve => setTimeout(resolve, ms));
+        }
+        
+        function initScrollState(containerId) {
+            const container = document.getElementById(containerId);
+            if (!container) return;
+            
+            // 如果已有状态，重置
+            if (scrollStates[containerId]) {
+                scrollStates[containerId].isUserScrolling = false;
+                return;
+            }
+            
+            scrollStates[containerId] = {
+                isUserScrolling: false
+            };
+            
+            // 监听用户滚动，阻止事件冒泡到主页面
+            container.addEventListener('wheel', (e) => {
+                e.stopPropagation();
+                if (scrollStates[containerId]) {
+                    scrollStates[containerId].isUserScrolling = true;
+                    // 3秒后恢复自动滚动
+                    setTimeout(() => {
+                        if (scrollStates[containerId]) {
+                            scrollStates[containerId].isUserScrolling = false;
+                        }
+                    }, 3000);
+                }
+            }, { passive: false });
+        }
+
+        function addQQMessage(containerId, type, name, content, isBlocked = false) {
+            const container = document.getElementById(containerId);
+            const msg = document.createElement('div');
+            msg.className = `qq-msg ${type}${isBlocked ? ' blocked' : ''}`;
+            const avatars = {
+                'me': '👤',
+                'others': '🧑',
+                'bot': '🤖'
+            };
+            msg.innerHTML = `
+                <div class="qq-avatar">${avatars[type] || '🧑'}</div>
+                <div class="qq-msg-content">
+                    <div class="qq-msg-name">${name}</div>
+                    <div class="qq-bubble">${content}</div>
+                </div>
+            `;
+            container.appendChild(msg);
+            
+            // 初始化滚动状态
+            initScrollState(containerId);
+            
+            // 自动滚动到底部，除非用户正在手动滚动
+            setTimeout(() => {
+                const state = scrollStates[containerId];
+                if (!state || !state.isUserScrolling) {
+                    container.scrollTop = container.scrollHeight;
+                }
+            }, 100);
+        }
+
+        async function runDualDetectionDemo() {
+            const chat = document.getElementById('dual-chat');
+            chat.innerHTML = '';
+            
+            addQQMessage('dual-chat', 'bot', '文本审核', '🔍 文本审核插件已启用');
+            addQQMessage('dual-chat', 'others', '管理员', '大家好！欢迎来到二次元交流群，请文明发言~');
+            await delay(800);
+
+            addQQMessage('dual-chat', 'me', '我', '今天天气真好啊');
+            await delay(600);
+
+            await delay(1000);
+            addQQMessage('dual-chat', 'me', '我', '傻逼去死吧');
+            await delay(600);
+            addQQMessage('dual-chat', 'bot', '文本审核', `🚫 检测到严重违规内容！消息已撤回
+
+━━━━━━━━━━━━━━━
+📋 违规等级：🔴 严重违规
+📝 违规内容：傻逼
+⚖️ 惩罚力度：累计 1/2 次后将踢出群聊
+━━━━━━━━━━━━━━━`);
+
+            await delay(1500);
+            addQQMessage('dual-chat', 'me', '我', '大调查小萝莉');
+            await delay(800);
+            addQQMessage('dual-chat', 'bot', '文本审核', '🧠 AI 正在分析语义...');
+            await delay(1500);
+            addQQMessage('dual-chat', 'bot', '文本审核', `🚫 检测到严重违规内容！消息已撤回
+
+━━━━━━━━━━━━━━━
+📋 违规等级：🔴 严重违规
+📌 违规类型：性暗示未成年
+⚖️ 惩罚力度：累计 2/2 次后将踢出群聊
+━━━━━━━━━━━━━━━
+
+👢 用户 123456 因严重违规已被踢出群`);
+            
+            await delay(1000);
+        }
+
+        async function runAILearningDemo() {
+            const chat = document.getElementById('ai-chat');
+            const wordList = document.getElementById('ai-word-list');
+            chat.innerHTML = '';
+            wordList.innerHTML = `
+                <div class="astrbot-word-tag">傻逼</div>
+                <div class="astrbot-word-tag">操你妈</div>
+                <div class="astrbot-word-tag">色情</div>
+            `;
+
+            addQQMessage('ai-chat', 'bot', '文本审核', '🧠 AI 自动学习已启用');
+            await delay(800);
+
+            addQQMessage('ai-chat', 'me', '用户A', '香草萝莉真可爱');
+            await delay(600);
+            addQQMessage('ai-chat', 'bot', '文本审核', '🧠 AI 正在分析语义...');
+            await delay(1200);
+            addQQMessage('ai-chat', 'bot', '文本审核', `🚫 检测到严重违规内容！消息已撤回
+
+━━━━━━━━━━━━━━━
+📋 违规等级：🔴 严重违规
+📌 违规类型：性暗示未成年
+⚖️ 惩罚力度：累计 1/2 次后将踢出群聊
+━━━━━━━━━━━━━━━`);
+            await delay(800);
+            addQQMessage('ai-chat', 'bot', '文本审核', '💡 AI 自动提取违规词：香草萝莉 → 添加到词库');
+
+            wordList.innerHTML += `<div class="astrbot-word-tag new">香草萝莉</div>`;
+            await delay(1200);
+
+            addQQMessage('ai-chat', 'me', '用户B', '香草萝莉真可爱');
+            await delay(600);
+            addQQMessage('ai-chat', 'bot', '文本审核', `🚫 检测到严重违规内容！消息已撤回
+
+━━━━━━━━━━━━━━━
+📋 违规等级：🔴 严重违规
+📝 违规内容：香草萝莉
+⚖️ 惩罚力度：累计 1/2 次后将踢出群聊
+━━━━━━━━━━━━━━━`);
+            
+            await delay(1000);
+        }
+
+        async function runGradingDemo() {
+            const chat = document.getElementById('grading-chat');
+            chat.innerHTML = '';
+
+            addQQMessage('grading-chat', 'bot', '文本审核', '⚖️ 分级管控：BLOCK/WARNING/SAFE');
+            await delay(800);
+
+            addQQMessage('grading-chat', 'me', '用户', '今天晚上一起吃饭吧');
+            await delay(600);
+
+            await delay(1000);
+            addQQMessage('grading-chat', 'me', '用户', '你这个人真烦人');
+            await delay(600);
+            addQQMessage('grading-chat', 'bot', '文本审核', `💡 检测到轻度违规内容！消息已撤回
+
+━━━━━━━━━━━━━━━
+📋 违规等级：🟡 轻度违规
+📝 违规内容：烦人
+⚖️ 惩罚力度：仅警告，不计入惩罚次数
+━━━━━━━━━━━━━━━
+
+请文明用语，避免再次违规。`);
+
+            await delay(1200);
+            addQQMessage('grading-chat', 'me', '用户', '操你妈去死');
+            await delay(600);
+            addQQMessage('grading-chat', 'bot', '文本审核', `🚫 检测到严重违规内容！消息已撤回
+
+━━━━━━━━━━━━━━━
+📋 违规等级：🔴 严重违规
+📝 违规内容：操你妈
+⚖️ 惩罚力度：累计 1/2 次后将踢出群聊
+━━━━━━━━━━━━━━━`);
+            
+            await delay(1000);
+        }
+
+        async function runSarcasmDemo() {
+            const chat = document.getElementById('sarcasm-chat');
+            chat.innerHTML = '';
+
+            addQQMessage('sarcasm-chat', 'bot', '文本审核', '🎯 智能区分「对事」与「对人」');
+            await delay(800);
+
+            addQQMessage('sarcasm-chat', 'me', '用户', '这电影拍得真烂');
+            await delay(600);
+
+            await delay(1000);
+            addQQMessage('sarcasm-chat', 'me', '用户', '你怕不是个傻子吧');
+            await delay(600);
+            addQQMessage('sarcasm-chat', 'bot', '文本审核', `💡 检测到轻度违规内容！消息已撤回
+
+━━━━━━━━━━━━━━━━
+📋 违规等级：🟡 轻度违规
+📌 违规类型：人身攻击
+⚖️ 惩罚力度：仅警告，不计入惩罚次数
+━━━━━━━━━━━━━━━━
+
+请文明用语，避免再次违规。`);
+            
+            await delay(1000);
+        }
+
+        async function runRecordsDemo() {
+            const tbody = document.getElementById('records-tbody');
+            const chat = document.getElementById('records-chat');
+            
+            if (!tbody) {
+                console.error('records-tbody not found!');
+                return;
+            }
+            
+            tbody.innerHTML = '';
+            chat.innerHTML = '';
+            currentRecordsPage = 1;
+
+            addQQMessage('records-chat', 'bot', '文本审核', '🔍 文本审核插件已启用');
+            await delay(600);
+
+            // 第一条违规
+            addQQMessage('records-chat', 'me', '用户A', '傻逼去死吧');
+            await delay(500);
+            addQQMessage('records-chat', 'bot', '文本审核', `🚫 检测到严重违规内容！消息已撤回
+
+━━━━━━━━━━━━━━━
+📋 违规等级：🔴 严重违规
+📝 违规内容：傻逼
+⚖️ 惩罚力度：累计 1/2 次后将踢出群聊
+━━━━━━━━━━━━━━━`);
+            
+            await delay(400);
+            const row1 = document.createElement('tr');
+            row1.style.opacity = '0';
+            row1.style.animation = 'fadeIn 0.3s ease forwards';
+            row1.innerHTML = `
+                <td style="padding: 10px; border-bottom: 1px solid #ffe4e1; white-space: nowrap; color: #333;">${new Date().toLocaleString()}</td>
+                <td style="padding: 10px; border-bottom: 1px solid #ffe4e1; color: #333;">用户A</td>
+                <td style="padding: 10px; border-bottom: 1px solid #ffe4e1; color: #333;">12345678</td>
+                <td style="padding: 10px; font-weight: 700; color: #c2185b; border-bottom: 1px solid #ffe4e1;">🔴 严重</td>
+                <td style="padding: 10px; border-bottom: 1px solid #ffe4e1; color: #333;"><span style="padding: 2px 8px; border-radius: 10px; font-size: 11px; font-weight: 600; background: rgba(255,107,157,0.15); color: #c2185b;">关键词</span></td>
+                <td style="padding: 10px; border-bottom: 1px solid #ffe4e1; max-width: 150px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: #333;">傻逼去死吧</td>
+                <td style="padding: 10px; border-bottom: 1px solid #ffe4e1; max-width: 150px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: #333;">辱骂他人</td>
+            `;
+            tbody.appendChild(row1);
+
+            await delay(1000);
+
+            // 第二条违规
+            addQQMessage('records-chat', 'me', '用户B', '你脑子有问题');
+            await delay(500);
+            addQQMessage('records-chat', 'bot', '文本审核', `💡 检测到轻度违规内容！消息已撤回
+
+━━━━━━━━━━━━━━━
+📋 违规等级：🟡 轻度违规
+📝 违规内容：脑子有问题
+⚖️ 惩罚力度：仅警告，不计入惩罚次数
+━━━━━━━━━━━━━━━`);
+
+            await delay(400);
+            const row2 = document.createElement('tr');
+            row2.style.opacity = '0';
+            row2.style.animation = 'fadeIn 0.3s ease forwards';
+            row2.innerHTML = `
+                <td style="padding: 10px; border-bottom: 1px solid #ffe4e1; white-space: nowrap; color: #333;">${new Date().toLocaleString()}</td>
+                <td style="padding: 10px; border-bottom: 1px solid #ffe4e1; color: #333;">用户B</td>
+                <td style="padding: 10px; border-bottom: 1px solid #ffe4e1; color: #333;">12345678</td>
+                <td style="padding: 10px; font-weight: 700; color: #ef6c00; border-bottom: 1px solid #ffe4e1;">🟡 轻度</td>
+                <td style="padding: 10px; border-bottom: 1px solid #ffe4e1; color: #333;"><span style="padding: 2px 8px; border-radius: 10px; font-size: 11px; font-weight: 600; background: rgba(179,157,219,0.2); color: #7b1fa2;">AI</span></td>
+                <td style="padding: 10px; border-bottom: 1px solid #ffe4e1; max-width: 150px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: #333;">你脑子有问题</td>
+                <td style="padding: 10px; border-bottom: 1px solid #ffe4e1; max-width: 150px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: #333;">人身攻击</td>
+            `;
+            tbody.appendChild(row2);
+
+            await delay(1000);
+
+            // 第三条违规
+            addQQMessage('records-chat', 'me', '用户A', '大调查小萝莉');
+            await delay(500);
+            addQQMessage('records-chat', 'bot', '文本审核', '🧠 AI 正在分析语义...');
+            await delay(800);
+            addQQMessage('records-chat', 'bot', '文本审核', `🚫 检测到严重违规内容！消息已撤回
+
+━━━━━━━━━━━━━━━
+📋 违规等级：🔴 严重违规
+📌 违规类型：性暗示未成年
+⚖️ 惩罚力度：累计 2/2 次后将踢出群聊
+━━━━━━━━━━━━━━━
+
+👢 用户A 因严重违规已被踢出群`);
+
+            await delay(400);
+            const row3 = document.createElement('tr');
+            row3.style.opacity = '0';
+            row3.style.animation = 'fadeIn 0.3s ease forwards';
+            row3.innerHTML = `
+                <td style="padding: 10px; border-bottom: 1px solid #ffe4e1; white-space: nowrap; color: #333;">${new Date().toLocaleString()}</td>
+                <td style="padding: 10px; border-bottom: 1px solid #ffe4e1; color: #333;">用户A</td>
+                <td style="padding: 10px; border-bottom: 1px solid #ffe4e1; color: #333;">12345678</td>
+                <td style="padding: 10px; font-weight: 700; color: #c2185b; border-bottom: 1px solid #ffe4e1;">🔴 严重</td>
+                <td style="padding: 10px; border-bottom: 1px solid #ffe4e1; color: #333;"><span style="padding: 2px 8px; border-radius: 10px; font-size: 11px; font-weight: 600; background: rgba(179,157,219,0.2); color: #7b1fa2;">AI</span></td>
+                <td style="padding: 10px; border-bottom: 1px solid #ffe4e1; max-width: 150px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: #333;">大调查小萝莉</td>
+                <td style="padding: 10px; border-bottom: 1px solid #ffe4e1; max-width: 150px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: #333;">性暗示未成年</td>
+            `;
+            tbody.appendChild(row3);
+            
+            await delay(1500);
+            
+            // 演示完成，自动切换到违规记录页面
+            addQQMessage('records-chat', 'bot', '文本审核', '📊 违规记录已更新，正在跳转查看详情...');
+            await delay(800);
+            switchRecordsPage(2);
+        }
+
+        async function runWebUIDemo() {
+            const wordList1 = document.getElementById('webui-word-list');
+            const wordList2 = document.getElementById('webui-word-list-2');
+            
+            wordList1.innerHTML = `
+                <div class="astrbot-word-tag">傻逼</div>
+                <div class="astrbot-word-tag">操你妈</div>
+                <div class="astrbot-word-tag">色情</div>
+                <div class="astrbot-word-tag">毒品</div>
+            `;
+            wordList2.innerHTML = `
+                <div class="astrbot-word-tag">傻子</div>
+                <div class="astrbot-word-tag">笨蛋</div>
+                <div class="astrbot-word-tag">烦人</div>
+            `;
+
+            await delay(1000);
+            wordList1.innerHTML += `<div class="astrbot-word-tag new">香草萝莉</div>`;
+            wordList2.innerHTML += `<div class="astrbot-word-tag new">你脑子有问题</div>`;
+            
+            await delay(1000);
+        }
+
+        async function runAdminDemo() {
+            const adminList = document.getElementById('admin-list');
+            adminList.innerHTML = `
+                <div class="astrbot-word-tag">123456</div>
+                <div class="astrbot-word-tag">789012</div>
+            `;
+
+            await delay(1000);
+            adminList.innerHTML += `<div class="astrbot-word-tag new">345678</div>`;
+            
+            await delay(1000);
+        }
+
+        async function runTokenDemo() {
+            const callsEl = document.getElementById('token-calls');
+            const promptEl = document.getElementById('token-prompt');
+            const completionEl = document.getElementById('token-completion');
+            const costEl = document.getElementById('token-cost');
+            const monthCostEl = document.getElementById('token-month-cost');
+            const messagesEl = document.getElementById('token-messages');
+            const charsEl = document.getElementById('token-chars');
+
+            let calls = 0, prompt = 0, completion = 0, messages = 0, chars = 0;
+
+            for (let i = 0; i < 5; i++) {
+                await delay(800);
+                const addCalls = Math.floor(Math.random() * 3) + 1;
+                const addPrompt = Math.floor(Math.random() * 100) + 50;
+                const addCompletion = Math.floor(Math.random() * 50) + 10;
+                const addMessages = Math.floor(Math.random() * 5) + 1;
+                const addChars = Math.floor(Math.random() * 100) + 50;
+
+                calls += addCalls;
+                prompt += addPrompt;
+                completion += addCompletion;
+                messages += addMessages;
+                chars += addChars;
+
+                callsEl.textContent = calls;
+                promptEl.textContent = prompt;
+                completionEl.textContent = completion;
+                messagesEl.textContent = messages;
+                charsEl.textContent = chars;
+
+                const cost = ((prompt * 0.27 + completion * 1.10) / 1000000).toFixed(4);
+                const monthCost = ((prompt * 0.27 + completion * 1.10) / 1000000 * 30).toFixed(2);
+                costEl.textContent = '$' + cost;
+                monthCostEl.textContent = '$' + monthCost;
+            }
+            
+            await delay(1000);
+        }
+
+        async function runNotifyDemo() {
+            const groupChat = document.getElementById('notify-group-chat');
+            const privateChat = document.getElementById('notify-private-chat');
+            groupChat.innerHTML = '';
+            privateChat.innerHTML = '';
+
+            addQQMessage('notify-group-chat', 'bot', '文本审核', '🔍 文本审核插件已启用');
+            await delay(600);
+
+            addQQMessage('notify-group-chat', 'me', '用户A', '傻逼去死吧');
+            await delay(500);
+            addQQMessage('notify-group-chat', 'bot', '文本审核', `🚫 检测到严重违规内容！消息已撤回
+
+━━━━━━━━━━━━━━━
+📋 违规等级：🔴 严重违规
+📝 违规内容：傻逼
+⚖️ 惩罚力度：累计 1/2 次后将踢出群聊
+━━━━━━━━━━━━━━━`);
+
+            await delay(600);
+            addQQMessage('notify-private-chat', 'bot', '文本审核', `🔴 文本审核违规通知
+━━━━━━━━━━━━━━━
+👤 用户ID: 用户A
+👥 群号: 二次元交流群
+📋 违规等级: 严重违规
+📝 违规内容: 傻逼去死吧
+⚠️ 违规原因: 匹配到违禁词
+⏰ 时间: ${new Date().toLocaleString()}`);
+
+            await delay(1000);
+
+            addQQMessage('notify-group-chat', 'me', '用户B', '大调查小萝莉');
+            await delay(500);
+            addQQMessage('notify-group-chat', 'bot', '文本审核', '🧠 AI 正在分析语义...');
+            await delay(800);
+            addQQMessage('notify-group-chat', 'bot', '文本审核', `🚫 检测到严重违规内容！消息已撤回
+
+━━━━━━━━━━━━━━━
+📋 违规等级：🔴 严重违规
+📌 违规类型：性暗示未成年
+⚖️ 惩罚力度：累计 1/2 次后将踢出群聊
+━━━━━━━━━━━━━━━`);
+
+            await delay(600);
+            addQQMessage('notify-private-chat', 'bot', '文本审核', `🔴 文本审核违规通知
+━━━━━━━━━━━━━━━
+👤 用户ID: 用户B
+👥 群号: 二次元交流群
+📋 违规等级: 严重违规
+📝 违规内容: 大调查小萝莉
+⚠️ 违规原因: AI识别到性暗示未成年
+⏰ 时间: ${new Date().toLocaleString()}`);
+            
+            await delay(1000);
+        }
+
+        modalOverlay.addEventListener('click', e => {
+            if (e.target === modalOverlay) closeDemo();
+        });
+        
+        // 阻止模态框内滚轮事件冒泡到主页面
+        modalOverlay.addEventListener('wheel', (e) => {
+            e.stopPropagation();
+        }, { passive: false });
+    </script>
+</body>
+</html>
